@@ -19,22 +19,23 @@ let vendorNeuralNetwork = new Network({
 
 Test();
 
-vendorNeuralNetwork = new Architect.LSTM(3, 4, 4, 4, 1);
-console.log('Long-Short Term Memory Arc.');
+vendorNeuralNetwork = new Architect.LSTM(3,4,4,4,1);
+
+console.log('Long-short term memory algorithm');
 
 Test();
 
 function Test() {
-	console.log(`Output Before Train [1, 2, 3] :\t${vendorNeuralNetwork.activate([1, 2, 3])[0].toFixed(4)}`);
-	console.log(`Output Before Train [1, 1, 1] :\t${vendorNeuralNetwork.activate([1, 1, 1])[0].toFixed(4)}`);
-	for (let i = 0; i < 10000; i++) {
+	console.log(`Output Before Train [1, 2, 3] :\t${vendorNeuralNetwork.activate([1, 2, 3])[0].toFixed(8)}`);
+	console.log(`Output Before Train [1, 1, 1] :\t${vendorNeuralNetwork.activate([1, 1, 1])[0].toFixed(8)}`);
+	for (let i = 0; i < 100000; i++) {
 		vendorNeuralNetwork.activate([1, 2, 3]);
-		vendorNeuralNetwork.propagate(.3, [1]);
+		vendorNeuralNetwork.propagate(.2, [1]);
 		vendorNeuralNetwork.activate([1, 1, 1]);
-		vendorNeuralNetwork.propagate(.3, [0]);
+		vendorNeuralNetwork.propagate(.2, [0]);
 	}
-	console.log(`Output After Train [1, 2, 3] :\t${vendorNeuralNetwork.activate([1, 2, 3])[0].toFixed(4)} , Correct value : 1`);
-	console.log(`Output After Train [1, 1, 1] :\t${vendorNeuralNetwork.activate([1, 1, 1])[0].toFixed(4)} , Correct value : 0`);
-	console.log(`${vendorNeuralNetwork.activate([1, 2, 2])}`);
-	console.log(`${vendorNeuralNetwork.activate([2, 1, 2])}`);
-};
+	console.log(`Output After Train [1, 2, 3] :\t${vendorNeuralNetwork.activate([1, 2, 3])[0].toFixed(8)} , Correct value : 1`);
+	console.log(`Output After Train [1, 1, 1] :\t${vendorNeuralNetwork.activate([1, 1, 1])[0].toFixed(8)} , Correct value : 0`);
+	console.log(`Output After Train [2, 2, 2] :\t${vendorNeuralNetwork.activate([2, 2, 2])[0].toFixed(8)} , Correct value : 0`);
+}
+
