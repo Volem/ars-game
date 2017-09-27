@@ -1,22 +1,22 @@
 'use strict';
-const Item = require('./item');
+const config = require('../config');
+const Items = require('./item');
+const Item = Items.Item;
 
 const ItemPrice = function(item = new Item(), price = 0){
 	this.Item = item;
 	this.Price = price; 
 };
 
-const Ore = new Item('Ore');
-const Wood = new Item('Wood');
-const Stick = new Item('Stick');
-const Pickaxe = new Item('Pickaxe');
-const OrePrice = new ItemPrice(Ore, 5);
-const WoodPrice = new ItemPrice(Wood, 1);
-// Requires 2 Wook
-const StickPrice = new ItemPrice(Stick, 2);		
-// Requires 1 Stick 5 Ore
-const PickaxePrice = new ItemPrice(Pickaxe, 27); 
+const OrePrice = new ItemPrice(new Items.Ore(100), 5);
+const WoodPrice = new ItemPrice(new Items.Wood(100), 1);
+// Requires 2 Wood + Workmanship
+const StickPrice = new ItemPrice(new Items.Stick(100), WoodPrice.Price * 2 + config.Workmanship);		
+// Requires 1 Stick 5 Ore + Workmanship
+const PickaxePrice = new ItemPrice(new Items.Pickaxe(100), OrePrice.Price * 5 + StickPrice.Price + config.Workmanship); 
+// Requires 1 Stick 5 Ore + Workmanship
+const HatchetPrice = new ItemPrice(new Items.Hatchet(100), OrePrice.Price * 5 + StickPrice.Price + config.Workmanship);
 
-const ItemPrices = [OrePrice, WoodPrice, StickPrice, PickaxePrice];
+const ItemPrices = [OrePrice, WoodPrice, StickPrice, PickaxePrice, HatchetPrice];
 
 module.exports = ItemPrices;
