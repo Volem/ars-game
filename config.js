@@ -5,9 +5,10 @@ const itemPrices = require('./domain/price');
 // Character balance 
 // Skill Experience
 const brainInputCount = itemPrices.length * 2 + 2;
-const learningRate = 0.2;
 
 module.exports = {
 	BrainInputCount : brainInputCount,
-	LearningRate : learningRate
+	LearningRate : 0.2,
+	Workmanship : 5,
+	InitialExperience : 0.1
 };

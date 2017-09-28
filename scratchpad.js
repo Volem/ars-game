@@ -25,7 +25,6 @@ console.log('Long-short term memory algorithm');
 
 Test();
 
-
 function Test() {
 	console.log(`Output Before Train [1, 2, 3] :\t${vendorNeuralNetwork.activate([1, 2, 3])[0].toFixed(8)}`);
 	console.log(`Output Before Train [1, 1, 1] :\t${vendorNeuralNetwork.activate([1, 1, 1])[0].toFixed(8)}`);
