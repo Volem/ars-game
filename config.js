@@ -1,6 +1,9 @@
 'use strict';
-const itemPrices = require('../domain/price');
-// Number of items and their durabilities + character balance + skill
+const itemPrices = require('./domain/price');
+// Number of items 
+// Item durabilities
+// Character balance 
+// Skill Experience
 const brainInputCount = itemPrices.length * 2 + 2;
 const learningRate = 0.2;
 
