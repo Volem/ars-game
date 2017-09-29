@@ -17,12 +17,10 @@ const Blacksmith = new Skill('Blacksmith');
 
 const Produce = (item = new Item()) => (character = new Character()) => {
 	if (!character.Skill || !item.Name || character.Inventory.Items.length < item.Components.length) {
-		return { ProducedItem: null, Character: character };
+		return [...character.Inventory.Items];
 	}
 
-	let characterClone = arsfn.clone(character);
-
-	let inventory = characterClone.Inventory.Items;
+	let inventory = [...character.Inventory.Items];
 	let inventoryItemCounts = _.countBy(inventory, t => t.Name);
 	let itemComponentCounts = _.countBy(item.Components, t => t.Name);
 
@@ -31,47 +29,17 @@ const Produce = (item = new Item()) => (character = new Character()) => {
 		let componentCount = getItemCount(itemComponentCounts);
 		let inventoryCount = getItemCount(inventoryItemCounts);
 		if (!inventoryCount || !componentCount || inventoryCount < componentCount) {
-			return { ProducedItem: null, Character: character };
+			return [...character.Inventory.Items];
 		}
 
-		for (let i = 0; i < componentCount; i++) {
-			let itemIndex = inventory.findIndex(t => t.Name == itemName);
-			inventory.splice(itemIndex, 1);
-		}
+		let removeUsedItems = arsfn.removeBy(t => t.Name == itemName)(componentCount);
+		inventory = removeUsedItems(inventory);
 	}
 
 	inventory.push(item);
-	return { ProducedItem: item, Character: characterClone };
+	return inventory;
 };
 
-
-const createHatchet = (character = new Character()) => {
-	if (character.Skill.Name != Blacksmith.Name) {
-		return character;
-	}
-	let clonedCharacter = _.clone(character);
-	let inventory = clonedCharacter.Inventory.Items;
-	let oreCount = _.countBy(inventory, i => i.Name == Items.Ore.Name);
-	let stickCount = _.countBy(inventory, i => i.Name == Items.Stick.Name);
-	if (stickCount < 2 && oreCount < 5) {
-		return character;
-	}
-	let usedOre = 0, usedStick = 0;
-	for (let i = 0; i < inventory.length; i++) {
-		let currentItem = inventory[i];
-		if (usedOre == 5 && usedStick == 2) {
-			inventory.push(new Items.Hatchet(100));
-			return clonedCharacter;
-		}
-		if (currentItem.Name == 'Ore') {
-			inventory.splice(i, 1);
-			usedOre++;
-		} else if (currentItem.Name == 'Stick') {
-			inventory.splice(i, 1);
-			usedStick++;
-		}
-	}
-};
 
 
 module.exports = {

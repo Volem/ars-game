@@ -5,7 +5,7 @@ const Item = Items.Item;
 const Ore = new Items.Ore();
 const Wood = new Items.Wood();
 
-// Requires 2 wood
+// Requires 2 wood 
 const Stick = new Items.Stick();
 const TwoWoods = Array(2).fill(Wood);
 Stick.Components = [...TwoWoods];
@@ -13,11 +13,11 @@ Stick.Components = [...TwoWoods];
 // Requires 1 Stick 5 Ore 
 const Pickaxe = new Items.Pickaxe();
 const FiveOres = Array(5).fill(Ore);
-Pickaxe.Components = [...TwoWoods, ...FiveOres];
+Pickaxe.Components = [Stick, ...FiveOres];
 
 // Requires 1 Stick 5 Ore 
 const Hatchet = new Items.Hatchet();
-Hatchet.Components = [...TwoWoods, ...FiveOres];
+Hatchet.Components = [Stick, ...FiveOres];
 
 const CalculatePrice = (item = new Item()) => {
 	if (item.Name == new Items.Wood().Name) {
