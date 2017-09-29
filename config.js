@@ -1,14 +1,17 @@
 'use strict';
-const itemPrices = require('./domain/price');
+const Items = require('./domain/item');
 // Number of items 
 // Item durabilities
 // Character balance 
 // Skill Experience
-const brainInputCount = itemPrices.length * 2 + 2;
+const brainInputCount = Object.keys(Items).filter(t => t != '').length * 2 + 2;
+console.log(`Brain input ${brainInputCount}`);
 
 module.exports = {
 	BrainInputCount : brainInputCount,
 	LearningRate : 0.2,
 	Workmanship : 5,
-	InitialExperience : 0.1
+	InitialExperience : 0.1,
+	WoodPrice : 1,
+	OrePrice : 2
 };

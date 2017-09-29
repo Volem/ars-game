@@ -1,8 +1,9 @@
 'use strict';
 const Item = function (name = '') {
-	return function(durability = 0) {
+	return function () {
+		this.Components = [];
 		this.Name = name;
-		this.Durability = durability;
+		this.Durability = 100;
 	};
 };
 
@@ -13,10 +14,10 @@ const Pickaxe = Item('Pickaxe');
 const Hatchet = Item('Hatchet');
 
 module.exports = {
-	Item : Item(''),
-	Ore : Ore,
-	Wood : Wood,
-	Stick : Stick,
-	Pickaxe : Pickaxe,
-	Hatchet : Hatchet
+	Item: Item(''),
+	Ore: Ore,
+	Wood: Wood,
+	Stick: Stick,
+	Pickaxe: Pickaxe,
+	Hatchet: Hatchet
 };
