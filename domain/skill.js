@@ -1,5 +1,6 @@
 'use strict';
 const _ = require('lodash');
+const arsfn = require('ars-functional');
 const Character = require('./character');
 const Items = require('./item');
 const Item = Items.Item;
@@ -15,21 +16,34 @@ const Carpenter = new Skill('Carpenter');
 const Blacksmith = new Skill('Blacksmith');
 
 const Produce = (item = new Item()) => (character = new Character()) => {
-	if (!character.Skill || !item.Name || character.Inventory.Items.length == 0) {
-		return null;
+	if (!character.Skill || !item.Name || character.Inventory.Items.length < item.Components.length) {
+		return { ProducedItem: null, Character: character };
 	}
 
-	
-	let woodCount = _.countBy(character.Inventory.Items, i => i.Name == Items.Wood.Name);
+	let characterClone = arsfn.clone(character);
 
-	switch (item.Name) {
-		case 'Hatchet': {
-			return createHatchet(character);
+	let inventory = characterClone.Inventory.Items;
+	let inventoryItemCounts = _.countBy(inventory, t => t.Name);
+	let itemComponentCounts = _.countBy(item.Components, t => t.Name);
+
+	for (let itemName in itemComponentCounts) {
+		let getItemCount = arsfn.getPropVal(itemName);
+		let componentCount = getItemCount(itemComponentCounts);
+		let inventoryCount = getItemCount(inventoryItemCounts);
+		if (!inventoryCount || !componentCount || inventoryCount < componentCount) {
+			return { ProducedItem: null, Character: character };
 		}
-		default:
-			break;
+
+		for (let i = 0; i < componentCount; i++) {
+			let itemIndex = inventory.findIndex(t => t.Name == itemName);
+			inventory.splice(itemIndex, 1);
+		}
 	}
+
+	inventory.push(item);
+	return { ProducedItem: item, Character: characterClone };
 };
+
 
 const createHatchet = (character = new Character()) => {
 	if (character.Skill.Name != Blacksmith.Name) {
@@ -45,14 +59,14 @@ const createHatchet = (character = new Character()) => {
 	let usedOre = 0, usedStick = 0;
 	for (let i = 0; i < inventory.length; i++) {
 		let currentItem = inventory[i];
-		if(usedOre == 5 && usedStick == 2) {
+		if (usedOre == 5 && usedStick == 2) {
 			inventory.push(new Items.Hatchet(100));
 			return clonedCharacter;
 		}
-		if(currentItem.Name == 'Ore') {
+		if (currentItem.Name == 'Ore') {
 			inventory.splice(i, 1);
 			usedOre++;
-		} else if(currentItem.Name == 'Stick') {
+		} else if (currentItem.Name == 'Stick') {
 			inventory.splice(i, 1);
 			usedStick++;
 		}
