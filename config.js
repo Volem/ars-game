@@ -5,7 +5,6 @@ const Items = require('./domain/item');
 // Character balance 
 // Skill Experience
 const brainInputCount = Object.keys(Items).filter(t => t != '').length * 2 + 2;
-console.log(`Brain input ${brainInputCount}`);
 
 module.exports = {
 	BrainInputCount : brainInputCount,
