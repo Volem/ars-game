@@ -7,6 +7,7 @@ const EventManager = require('./service/eventManager');
 const LogManager = require('./service/logmanager');
 const trade = require('./service/trade');
 const Character = require('./domain/character');
+const ai = require('./service/ai');
 
 /*
 EventManager.CarpenterCreated('Volem').then((volem) => {
@@ -31,21 +32,10 @@ StartSimulation()
 async function StartSimulation() {
 	let volem = await EventManager.BlacksmithCreated('Volem');
 	volem.Inventory.Items = [...Array(10).fill(items.Ore), ...Array(10).fill(items.Wood), items.Furnace];
-	getInputs(volem);
+	console.log(ai.NeuralNetworkInputseuralNetworkInputs(volem));
 }
 
 
-
-const getInputs = (char = new Character()) => {
-	let input = [];
-	let itemCounts = _.countBy(char.Inventory.Items, t => t.Name);
-	let itemDurabilities = _.sumBy(char.Inventory.Items, t => t.Durability);
-	console.log('Item Dur : ' + itemDurabilities);
-	for (let prop of Object.keys(items)) {
-		input.push(itemCounts.hasOwnProperty(prop) ? itemCounts[prop] : 0);
-	}
-	console.log(input);
-};
 
 
 
