@@ -8,8 +8,7 @@ const Schema = mongoose.Schema;
 const EventSchema = new Schema({
 	Timestamp : Schema.Types.Long,
 	Name : String,
-	CompletedOn : Schema.Types.Long,	
-	Parameters : Schema.Types.Mixed
+	Parameters : String
 });
 
 module.exports = mongoose.model('Event', EventSchema);

@@ -1,13 +1,11 @@
 'use strict';
 const config = require('../config');
 const Character = require('../domain/character');
-const Brain = require('../domain/brain');
 const Skill = require('../domain/skill').Skill;
 
 const createCharacter = (skill = new Skill()) => (name = '') => {
 	let character = new Character(name);
-	character.Brain = Brain;
-	return Object.assign(character, { Skill : skill });
+	return Object.assign(character, { Skill: skill });
 };
 
 const trainCharacter = (char = new Character()) => (input = [0]) => (output = 0) => {
@@ -19,7 +17,7 @@ const trainCharacter = (char = new Character()) => (input = [0]) => (output = 0)
 };
 
 const updateExperience = (char = new Character()) => (experienceInc = 0) => {
-	if(!char.Skill) {
+	if (!char.Skill) {
 		return;
 	}
 	let charClone = Object.assign({}, char);
@@ -27,8 +25,14 @@ const updateExperience = (char = new Character()) => (experienceInc = 0) => {
 	return charClone;
 };
 
+const implementBrain = (char = new Character()) => {
+	let charClone = Object.assign({}, char);
+	charClone.Brain = require('../domain/brain');
+};
+
 module.exports = {
 	CreateCharacter: createCharacter,
-	TrainCharacter : trainCharacter,
-	UpdateExperience : updateExperience
+	ImplementBrain: implementBrain,
+	TrainCharacter: trainCharacter,
+	UpdateExperience: updateExperience
 };

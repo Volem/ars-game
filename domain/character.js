@@ -2,7 +2,6 @@
 const Location = require('./location');
 const Direction = require('./direction');
 const Inventory = require('./inventory');
-const Brain = require('./brain');
 const runMultiplier = 2;
 
 const move = (step = 0) => (direction = Direction.North) => (fromlocation = new Location()) => {
@@ -23,6 +22,6 @@ module.exports = function (name = '') {
 	this.Name = name;
 	this.Move = move;
 	this.Run = run;
+	this.Brain = require('./brain');
 	this.Inventory = new Inventory(); 
-	this.Brain = Brain; 
 };
