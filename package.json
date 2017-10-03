@@ -21,7 +21,10 @@
   },
   "dependencies": {
     "ars-functional": "git+https://github.com/Volem/ars-functional.git",
+    "bluebird": "^3.5.0",
     "lodash": "^4.17.4",
+    "mongoose": "^4.11.14",
+    "mongoose-long": "^0.1.1",
     "synaptic": "^1.1.3"
   }
 }
