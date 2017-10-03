@@ -16,7 +16,6 @@ const EventHandler = function (eventName = '', eventFunc = Function) {
 		dbModel.Timestamp = event.Timestamp;
 		dbModel.Parameters = event.Parameters;
 		dbModel.CompletedOn = event.CompletedOn;
-		console.log(dbModel);
 		await dbModel.save();
 		return returnVal;
 	};
