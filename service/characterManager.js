@@ -5,6 +5,7 @@ const Skill = require('../domain/skill').Skill;
 
 const createCharacter = (skill = new Skill()) => (name = '') => {
 	let character = new Character(name);
+	character.Inventory.Balance = config.StartBalance;
 	return Object.assign(character, { Skill: skill });
 };
 

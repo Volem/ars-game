@@ -8,6 +8,8 @@ const calculatePrice = (item = new Item()) => {
 		return config.WoodPrice;
 	} else if(item.Name == Items.Ore.Name){
 		return config.OrePrice;
+	} else if(item.Name == Items.Stone.Name){
+		return config.StonePrice;
 	}
 	return item.Components.reduce((pre, cur) => {
 		return pre + calculatePrice(cur);
