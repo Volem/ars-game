@@ -8,6 +8,6 @@ module.exports = bunyan.createLogger({
 	name:'ars.lb',
 	level: 'trace',
 	streams: [{
-		path: process.env.logLocation + '/' + logname + '.log',
+		path: process.env.logLocation + '/' + logname + '.json',
 	}]
 });

@@ -1,7 +1,7 @@
 'use strict';
 const arsfn = require('ars-functional');
-const Character = require('./character');
-const Item = require('./item');
+const Character = require('../domain/character');
+const Item = require('../domain/item');
 
 const buy = (buyer = new Character()) => (item = new Item()) => (quantity = 0) => (price = 0) => {
 	if (!item.Name || quantity === 0) {
