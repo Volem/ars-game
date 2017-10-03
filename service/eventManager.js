@@ -1,9 +1,18 @@
 'use strict';
-const arsfn = require('ars-functional');
+const eventHandler = require('./eventHandler');
 const CharManager = require('./characterManager');
 const Skills = require('../domain/skill');
-const CreateMiner = CharManager.CreateCharacter(Skills.Miner);
-const CreateLumberjack = CharManager.CreateCharacter(Skills.Lumberjack);
-const CreateCarpenter = CharManager.CreateCharacter(Skills.Carpenter);
-const CreateBlacksmith = CharManager.CreateCharacter(Skills.Blacksmith);
+
+const MinerCreated = eventHandler('MinerCreated', CharManager.CreateCharacter(Skills.Miner));
+const LumberjackCreated = eventHandler('LumberjackCreated ', CharManager.CreateCharacter(Skills.Lumberjack));
+const CarpenterCreated = eventHandler('CarpenterCreated ', CharManager.CreateCharacter(Skills.Carpenter));
+const BlacksmithCreated = eventHandler('BlacksmithCreated ', CharManager.CreateCharacter(Skills.Blacksmith));
+
+module.exports = {
+	EventHandler : eventHandler,
+	MinerCreated : MinerCreated,
+	LumberjackCreated : LumberjackCreated,
+	CarpenterCreated : CarpenterCreated,
+	BlacksmithCreated : BlacksmithCreated
+};
 

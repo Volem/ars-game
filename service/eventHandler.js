@@ -4,7 +4,7 @@ const EventModel = require('../models/event.js').Model;
 
 const UTCNow = () => new Date().getTime();
 
-const EventHandler = function (eventName = '', eventFunc = Function) {
+module.exports = function (eventName = '', eventFunc = Function) {
 	return async (...args) => {
 		let event = new Event(eventName, eventFunc);
 		event.Timestamp = UTCNow();
@@ -20,5 +20,3 @@ const EventHandler = function (eventName = '', eventFunc = Function) {
 		return returnVal;
 	};
 };
-
-module.exports = EventHandler;
