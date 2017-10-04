@@ -31,9 +31,11 @@ StartSimulation()
 
 async function StartSimulation() {
 	let volem = await EventManager.MinerCreated('Volem');
-	console.log(ai.Think(volem));
-	ai.TrainMiner(volem);
-	console.log(ai.Think(volem));
+	let decision = ai.Think(volem);
+	console.log(`Decision : ${decision}`);
+	ai.Act(volem)(decision);
+	ai.Train(volem);
+	console.log(`Output : ${ai.Think(volem)}`);
 
 }
 

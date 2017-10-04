@@ -5,6 +5,8 @@ const _ = require('lodash');
 const Skills = require('../domain/skill');
 const Item = require('../domain/item');
 const arsfn = require('ars-functional');
+const trade = require('./trade');
+const produce = require('./produce');
 // == NEURAL Network Input Structure ==
 // 
 // First Item Count 
@@ -62,10 +64,7 @@ const neuralFormatInputs = (arr = []) => {
 const reformatInput = arsfn.compose(neuralFormatInputs, neuralNetworkInputs);
 
 const think = (char = new Character()) => {
-	let inputs = reformatInput(char);
-	console.log(`Inputs : ${inputs.length}`);
-	console.log(`Brain Inputs : ${char.Brain.inputs()}`);
-	return char.Brain.activate(inputs);
+	return char.Brain.activate(reformatInput(char));
 };
 
 const trainCharacter = (char = new Character()) => (output = 0) => {
@@ -73,32 +72,64 @@ const trainCharacter = (char = new Character()) => (output = 0) => {
 	char.Brain.propagate(config.LearningRate, output);
 };
 
-const trainMiner = (char = new Character()) => {
-	if (char.Skill.Name != Skills.Miner.Name) {
-		return;
-	}
-	let outputs = [];
-	let inputs = neuralNetworkInputs(char);
-	// No item at all. Needs to buy pickaxe
-	let noItem = _.filter(inputs, t => t.ItemName).every(t => t.Count == 0);
 
-	if (noItem) {
-		outputs.push(0); // Buy item.
-		const isPickaxe = (item = new Item()) => item.Name == items.Pickaxe.Name;
-		// Buy pickaxe.
-		for (let prop of Object.keys(items)) {
-			outputs.push(isPickaxe(items[prop]) ? 1 : 0);
-		}
-		console.log(`Output : ${outputs.length}`);
-		console.log(`Brain Output count : ${char.Brain.outputs()}`);
-	}
-	trainCharacter(char)(outputs);
+const TradeAction = {
+	Buy: 0.33,
+	Sell: 0.66,
+	Produce: 1.0
 };
 
+const roundToTradeAction = (action = 0) => {
+	if (action <= TradeAction.Buy) {
+		return TradeAction.Buy;
+	} else if (action <= TradeAction.Sell && action >= TradeAction.Buy) {
+		return TradeAction.Sell;
+	} else {
+		return TradeAction.Produce;
+	}
+};
+// Buy, Sell or Produce Decision Input 0
+// Buy 0
+// Sell 0.5
+// Produce 1
+// Action on which item Input 1...n
+const act = (char = new Character()) => (brainOutput = [0]) => {
+	let updatedChar = arsfn.clone(char);
+	for (let item of Object.keys(items)) {
+		let itemIndex = 1;
+		switch (roundToTradeAction(brainOutput[0])) {
+			case TradeAction.Buy: {
+				let buyThis = brainOutput[itemIndex] > 0.5;
+				if (buyThis) {
+					updatedChar = trade.Buy(char, items[item]);
+				}
+				break;
+			}
+			case TradeAction.Sell: {
+				let sellThis = brainOutput[itemIndex] > 0.5;
+				if (sellThis) {
+					updatedChar = trade.Sell(char, items[item]);
+				}
+				break;
+			}
+			case TradeAction.Produce: {
+				let produceThis = brainOutput[itemIndex] > 0.5;
+				if (produceThis) {
+					updatedChar = produce(items[item], char);
+				}
+				break;
+			}
+			default:
+				break;
+		}
+		itemIndex++;
+	}
+	return updatedChar;
+};
 
 module.exports = {
 	NeuralNetworkInputs: neuralNetworkInputs,
 	Think: think,
+	Act: act,
 	Train: trainCharacter,
-	TrainMiner: trainMiner
 };

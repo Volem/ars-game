@@ -2,43 +2,46 @@
 const arsfn = require('ars-functional');
 const Character = require('../domain/character');
 const Item = require('../domain/item');
+const pricing = require('./pricing');
 
-const buy = (buyer = new Character()) => (item = new Item()) => (quantity = 0) => (price = 0) => {
-	if (!item.Name || quantity === 0) {
+const buy = (buyer = new Character()) => (item = new Item()) => {
+	if (!item.Name) {
 		return buyer;
 	}
+	let price = pricing.ItemPrices[item.Name];
 	// Not enough balance. Buy failed.
-	if (buyer.Inventory.Balance < (quantity * price)) {
+	if (buyer.Inventory.Balance < price) {
 		return buyer;
 	}
 
 	let buyerClone = new Character();
 	buyerClone = arsfn.clone(buyer);
-	let boughtItems = [].fill(item, 0, quantity);
-	buyerClone.Inventory.Items.push(boughtItems);
-	buyerClone.Inventory.Balance -= (quantity * price);
+	buyerClone.Inventory.Items.push(item);
+	buyerClone.Inventory.Balance -= pricing.ItemPrices[item.Name];
 	return buyerClone;
 };
 
-const sell = (seller = new Character()) => (item = new Item()) => (quantity = 0) => (price = 0) => {
-	if (!item.Name || quantity === 0) {
+const sell = (seller = new Character()) => (item = new Item()) => {
+	if (!item.Name) {
 		return seller;
 	}
 	let soldItems = seller.Inventory.Items.filter(t => t.Name == item.Name);
+
+	let price = pricing.ItemPrices[item.Name];
 	// Not enough items. Sell failed.
-	if (soldItems.length < quantity) {
+	if (soldItems.length == 0) {
 		return seller;
 	}
 
 	let sellerClone = new Character();
 	sellerClone = arsfn.clone(seller);
 
-	sellerClone.Inventory.Balance += (quantity * price);
-	sellerClone.Inventory.Items = sellerClone.Inventory.Items.filter(t => soldItems.findIndex(f => f.Name == t.Name) != -1);
+	sellerClone.Inventory.Balance += price;
+	sellerClone.Inventory.Items = sellerClone.Inventory.Items.splice(seller.Inventory.Items.findIndex(t => t.Name == item.Name), 1);
 	return sellerClone;
 };
 
 module.exports = {
 	Buy: buy,
-	Sell : sell
+	Sell: sell
 };

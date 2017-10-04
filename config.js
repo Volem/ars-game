@@ -6,11 +6,11 @@ const Items = require('./domain/itemcomposition');
 // Skill Experience
 const itemCount = Object.keys(Items).filter(t => t != '').length; 
 const brainInputCount = itemCount * 2 + 2;
-// Buy, Sell or Produce Decision
-// Action on which item
+// Buy, Sell or Produce Decision Input 0
 // Buy 0
 // Sell 0.5
 // Produce 1
+// Action on which item Input 1...n
 const brainOutputCount = itemCount + 1;
 
 module.exports = {
