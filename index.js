@@ -30,10 +30,11 @@ StartSimulation()
 
 
 async function StartSimulation() {
-	let volem = await EventManager.BlacksmithCreated('Volem');
-	volem.Inventory.Items = [...Array(10).fill(items.Ore), ...Array(10).fill(items.Wood), items.Furnace];
-		
-	console.log(ai.NeuralNetworkInputs(volem));
+	let volem = await EventManager.MinerCreated('Volem');
+	console.log(ai.Think(volem));
+	ai.TrainMiner(volem);
+	console.log(ai.Think(volem));
+
 }
 
 /*
