@@ -4,9 +4,10 @@ const arsfn = require('ars-functional');
 const Character = require('../domain/character');
 const Item = require('../domain/item');
 const produce = (item = new Item()) => (character = new Character()) => {
-	if (!character.Skill || 
-		!item.Name ||  
+	if (!character.Skill ||
+		!item.Name ||
 		item.RequiredSkill.Name != character.Skill.Name ||
+		_.difference(item.RequiredTools, character.Inventory.Items).length > 0 ||
 		character.Inventory.Items.length < item.Components.length) {
 		return [...character.Inventory.Items];
 	}

@@ -95,27 +95,30 @@ const roundToTradeAction = (action = 0) => {
 // Action on which item Input 1...n
 const act = (char = new Character()) => (brainOutput = [0]) => {
 	let updatedChar = arsfn.clone(char);
+	let itemIndex = 1;
 	for (let item of Object.keys(items)) {
-		let itemIndex = 1;
+		let buying = trade.Buy(items[item]);
+		let selling = trade.Sell(items[item]);
+		let producing = produce(items[item]);
 		switch (roundToTradeAction(brainOutput[0])) {
 			case TradeAction.Buy: {
 				let buyThis = brainOutput[itemIndex] > 0.5;
 				if (buyThis) {
-					updatedChar = trade.Buy(char, items[item]);
+					updatedChar = buying(char);
 				}
 				break;
 			}
 			case TradeAction.Sell: {
 				let sellThis = brainOutput[itemIndex] > 0.5;
 				if (sellThis) {
-					updatedChar = trade.Sell(char, items[item]);
+					updatedChar = selling(char);
 				}
 				break;
 			}
 			case TradeAction.Produce: {
 				let produceThis = brainOutput[itemIndex] > 0.5;
 				if (produceThis) {
-					updatedChar = produce(items[item], char);
+					updatedChar.Inventory.Items = producing(char);
 				}
 				break;
 			}

@@ -4,7 +4,7 @@ const Character = require('../domain/character');
 const Item = require('../domain/item');
 const pricing = require('./pricing');
 
-const buy = (buyer = new Character()) => (item = new Item()) => {
+const buy = (item = new Item()) => (buyer = new Character()) => {
 	if (!item.Name) {
 		return buyer;
 	}
@@ -21,7 +21,7 @@ const buy = (buyer = new Character()) => (item = new Item()) => {
 	return buyerClone;
 };
 
-const sell = (seller = new Character()) => (item = new Item()) => {
+const sell = (item = new Item()) => (seller = new Character()) => {
 	if (!item.Name) {
 		return seller;
 	}
