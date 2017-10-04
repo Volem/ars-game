@@ -3,7 +3,7 @@ const config = require('../config');
 const Item = require('../domain/item');
 const Items = require('../domain/itemcomposition');
 
-const calculatePrice = (item = new Item()) => {
+const componentPrice = (item = new Item()) => {
 	if (item.Name == Items.Wood.Name) {
 		return config.WoodPrice;
 	} else if(item.Name == Items.Ore.Name){
@@ -12,7 +12,16 @@ const calculatePrice = (item = new Item()) => {
 		return config.StonePrice;
 	}
 	return item.Components.reduce((pre, cur) => {
-		return pre + calculatePrice(cur);
+		return pre + componentPrice(cur);
 	}, 0);
 };
-module.exports = calculatePrice;
+
+const ItemPrices = Object.keys(Items).reduce((cur, item) => {
+	cur[item] = componentPrice(Items[item]) + Math.round(Items[item].Components.length * config.Workmanship / 2);
+	return cur;
+}, {});
+
+module.exports = {
+	componentPrice : componentPrice,
+	ItemPrices : ItemPrices
+};

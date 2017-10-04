@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const config = require('./config');
 const items = require('./domain/itemcomposition');
-const calcPrice = require('./service/calculatePrice');
+const pricing = require('./service/pricing');
 const EventManager = require('./service/eventManager');
 const LogManager = require('./service/logmanager');
 const trade = require('./service/trade');
@@ -32,12 +32,9 @@ StartSimulation()
 async function StartSimulation() {
 	let volem = await EventManager.BlacksmithCreated('Volem');
 	volem.Inventory.Items = [...Array(10).fill(items.Ore), ...Array(10).fill(items.Wood), items.Furnace];
-	console.log(ai.NeuralNetworkInputseuralNetworkInputs(volem));
+		
+	console.log(ai.NeuralNetworkInputs(volem));
 }
-
-
-
-
 
 /*
 EventManager.MinerCreated('MinerVolem').then(function (minerVolem) {
@@ -49,6 +46,3 @@ volem = createBlacksmith('Volem');
 volem.Inventory.Items = [...volemsOres, ...volemsWoods, items.Stick];
 console.log(`Produced Item : ${_.difference(produceHatchet(volem), volem.Inventory.Items)[0].Name}`);
 */
-for (let a of Object.keys(items)) {
-	console.log(`Price of ${a} : ${calcPrice(items[a])}`);
-}
