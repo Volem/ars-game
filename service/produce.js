@@ -12,8 +12,8 @@ const produce = (item = new Item()) => (character = new Character()) => {
 		return [...character.Inventory.Items];
 	}
 
-	let inventory = [...character.Inventory.Items];
-	let inventoryItemCounts = _.countBy(inventory, t => t.Name);
+	let inventory = arsfn.clone(character.Inventory);
+	let inventoryItemCounts = _.countBy(inventory.Items, t => t.Name);
 	let itemComponentCounts = _.countBy(item.Components, t => t.Name);
 
 	for (let itemName in itemComponentCounts) {
@@ -25,10 +25,10 @@ const produce = (item = new Item()) => (character = new Character()) => {
 		}
 
 		let removeUsedItems = arsfn.removeBy(t => t.Name == itemName)(componentCount);
-		inventory = removeUsedItems(inventory);
+		inventory.Items = removeUsedItems(inventory.Items);
 	}
 
-	inventory.push(item);
+	inventory.Items.push(item);
 	return inventory;
 };
 

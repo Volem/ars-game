@@ -33,10 +33,11 @@ async function StartSimulation() {
 	let volem = await EventManager.MinerCreated('Volem');
 	let decision = ai.Think(volem);
 	console.log(`Decision : ${decision}`);
-	ai.Act(volem)(decision);
-	ai.Train(volem);
-	console.log(`Output : ${ai.Think(volem)}`);
-
+	let currentInventory = _.countBy(volem.Inventory.Items, t=> t.Name);
+	console.log(`Current Inventory = ${JSON.stringify(currentInventory)}`);
+	let updatedVolem = ai.Act(volem)(decision);
+	let updatedInventory = _.countBy(updatedVolem.Inventory.Items, t=> t.Name);
+	console.log(`Updated Inventory = ${JSON.stringify(updatedInventory)}`);
 }
 
 /*

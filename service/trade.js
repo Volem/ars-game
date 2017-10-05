@@ -11,14 +11,14 @@ const buy = (item = new Item()) => (buyer = new Character()) => {
 	let price = pricing.ItemPrices[item.Name];
 	// Not enough balance. Buy failed.
 	if (buyer.Inventory.Balance < price) {
-		return buyer;
+		return buyer.Inventory;
 	}
+		
+	let inventory = arsfn.clone(buyer.Inventory);
 
-	let buyerClone = new Character();
-	buyerClone = arsfn.clone(buyer);
-	buyerClone.Inventory.Items.push(item);
-	buyerClone.Inventory.Balance -= pricing.ItemPrices[item.Name];
-	return buyerClone;
+	inventory.Items.push(item);
+	inventory.Balance -= pricing.ItemPrices[item.Name];
+	return inventory;
 };
 
 const sell = (item = new Item()) => (seller = new Character()) => {
@@ -33,12 +33,11 @@ const sell = (item = new Item()) => (seller = new Character()) => {
 		return seller;
 	}
 
-	let sellerClone = new Character();
-	sellerClone = arsfn.clone(seller);
+	let inventory = arsfn.clone(seller.Inventory);
 
-	sellerClone.Inventory.Balance += price;
-	sellerClone.Inventory.Items = sellerClone.Inventory.Items.splice(seller.Inventory.Items.findIndex(t => t.Name == item.Name), 1);
-	return sellerClone;
+	inventory.Balance += price;
+	inventory.Items = inventory.Items.splice(inventory.Items.findIndex(t => t.Name == item.Name), 1);
+	return inventory;
 };
 
 module.exports = {

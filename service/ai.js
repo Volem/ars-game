@@ -72,59 +72,54 @@ const trainCharacter = (char = new Character()) => (output = 0) => {
 	char.Brain.propagate(config.LearningRate, output);
 };
 
-
-const TradeAction = {
-	Buy: 0.33,
-	Sell: 0.66,
-	Produce: 1.0
-};
-
 const roundToTradeAction = (action = 0) => {
+	const TradeAction = {
+		Buy: 0.33,
+		Sell: 0.66,
+		Produce: 1.0
+	};
+	const TradeActionEnum = {
+		Buy: 0,
+		Sell: 1,
+		Produce: 2
+	};
 	if (action <= TradeAction.Buy) {
-		return TradeAction.Buy;
-	} else if (action <= TradeAction.Sell && action >= TradeAction.Buy) {
-		return TradeAction.Sell;
+		return TradeActionEnum.Buy;
+	} else if (action <= TradeAction.Sell && action > TradeAction.Buy) {
+		return TradeActionEnum.Sell;
 	} else {
-		return TradeAction.Produce;
+		return TradeActionEnum.Produce;
 	}
 };
+
+const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item(), char = new Character()) => {
+	if (actionOnItem < 0.5) {
+		return char;
+	}
+	let actionEnum = roundToTradeAction(actionValue);
+	const actionHandler = {
+		0: trade.Buy(item),
+		1: trade.Sell(item),
+		2: produce(item)
+	};
+
+	let action = actionHandler[actionEnum.toString()];
+	let clone = arsfn.clone(char);
+
+	char.Inventory = action(char);
+	return clone;
+};
+
 // Buy, Sell or Produce Decision Input 0
-// Buy 0
-// Sell 0.5
-// Produce 1
+// Buy <= 0.33
+// 0.33 < Sell <= 0.66
+// Produce > 0.66
 // Action on which item Input 1...n
 const act = (char = new Character()) => (brainOutput = [0]) => {
 	let updatedChar = arsfn.clone(char);
 	let itemIndex = 1;
 	for (let item of Object.keys(items)) {
-		let buying = trade.Buy(items[item]);
-		let selling = trade.Sell(items[item]);
-		let producing = produce(items[item]);
-		switch (roundToTradeAction(brainOutput[0])) {
-			case TradeAction.Buy: {
-				let buyThis = brainOutput[itemIndex] > 0.5;
-				if (buyThis) {
-					updatedChar = buying(char);
-				}
-				break;
-			}
-			case TradeAction.Sell: {
-				let sellThis = brainOutput[itemIndex] > 0.5;
-				if (sellThis) {
-					updatedChar = selling(char);
-				}
-				break;
-			}
-			case TradeAction.Produce: {
-				let produceThis = brainOutput[itemIndex] > 0.5;
-				if (produceThis) {
-					updatedChar.Inventory.Items = producing(char);
-				}
-				break;
-			}
-			default:
-				break;
-		}
+		updatedChar = executeDecidedAction(brainOutput[0], brainOutput[itemIndex], items[item], updatedChar);
 		itemIndex++;
 	}
 	return updatedChar;
