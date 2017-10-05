@@ -11,7 +11,7 @@ const brainInputCount = itemCount * 2 + 2;
 // Sell 0.5
 // Produce 1
 // Action on which item Input 1...n
-const brainOutputCount = itemCount + 1;
+const brainOutputCount = 1;
 
 module.exports = {
 	BrainInputCount: brainInputCount,

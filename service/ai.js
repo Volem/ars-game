@@ -143,40 +143,39 @@ const act = (char = new Character()) => (brainOutput = [0]) => {
  *	@param resultSuccess End result of the last act. At current implementation the successful result is increase on character wealth. 
  */
 const learn = (char = new Character()) => (lastInput = [0], lastOutput = [0], actionSuccess = [0], resultSuccess = true) => {
-	// currently we are only learning from our failures :)
-	if (resultSuccess) {
-		return;
-	}
-
 	let expectedOutput = [...lastOutput];
-
-	// If character has no item, he needs to buy. Let's train this first.
-	if (char.Inventory.Items.length == 0 && roundToTradeAction(lastOutput[0]) != TradeAction.Buy) {
-		expectedOutput[0] = 0; // Less than 0.33 is buy
+	if (resultSuccess) {
 		trainCharacter(char)(lastInput, expectedOutput);
 		return;
-	}
+	} else {
 
-	// If character has no money, he cannot buy. Secondary life lesson :)
-	if (char.Inventory.Balance < 5 && roundToTradeAction(lastOutput[0]) == TradeAction.Buy) {
-		expectedOutput[0] = Math.floor((Math.random() * 66) + 33) / 100; // Some random greater than 0.33
+		// If character has no item, he needs to buy. Let's train this first.
+		if (char.Inventory.Items.length == 0 && roundToTradeAction(lastOutput[0]) != TradeAction.Buy) {
+			expectedOutput[0] = 0; // Less than 0.33 is buy
+			trainCharacter(char)(lastInput, expectedOutput);
+			return;
+		}
+
+		// If character has no money, he cannot buy. Secondary life lesson :)
+		if (char.Inventory.Balance < 5 && roundToTradeAction(lastOutput[0]) == TradeAction.Buy) {
+			expectedOutput[0] = Math.floor((Math.random() * 66) + 33) / 100; // Some random greater than 0.33
+			trainCharacter(char)(lastInput, expectedOutput);
+			return;
+		}
+
+
+		expectedOutput = [lastOutput[0]];
+		let itemOutputs = [...lastOutput];
+		itemOutputs.splice(0, 1);
+		// If you don't want to do anything with any item. Do some other action :)
+		if (_.every(itemOutputs, t => t < 0.5)) {
+			expectedOutput[0] = Math.random(); // Some random 
+		}
+		for (let i = 0; i < actionSuccess.length; i++) {
+			expectedOutput.push(actionSuccess[i] ? Math.round(itemOutputs[i]) : 0);
+		}
 		trainCharacter(char)(lastInput, expectedOutput);
-		return;
 	}
-
-
-	expectedOutput = [lastOutput[0]];
-	let itemOutputs = [...lastOutput];
-	itemOutputs.splice(0, 1);
-	// If you don't want to do anything with any item. Do some other action :)
-	if(_.every(itemOutputs, t => t < 0.5)) {
-		expectedOutput[0] = Math.random(); // Some random 
-	}
-	for (let i = 0; i < actionSuccess.length; i++) {
-		expectedOutput.push(actionSuccess[i] ? Math.round(itemOutputs[i]) : 0);
-	}
-
-	trainCharacter(char)(lastInput, expectedOutput);
 };
 
 module.exports = {

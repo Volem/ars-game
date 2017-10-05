@@ -47,7 +47,7 @@ async function StartSimulation() {
 		console.log(`Updated Inventory = ${JSON.stringify(updatedInventory)}`);
 		let learn = ai.Learn(volem);
 		learn(input, decision, actionResult.OutputSuccess, updatedWealth > currentWealth);
-		await sleep(1000);
+		await sleep(200);
 	}
 }
 
