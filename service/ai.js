@@ -2,11 +2,18 @@ const Character = require('../domain/character');
 const items = require('../domain/itemcomposition');
 const config = require('../config');
 const _ = require('lodash');
-const Skills = require('../domain/skill');
 const Item = require('../domain/item');
 const arsfn = require('ars-functional');
 const trade = require('./trade');
 const produce = require('./produce');
+
+const TradeAction = {
+	Buy: 0,
+	Sell: 1,
+	Produce: 2
+};
+
+
 // == NEURAL Network Input Structure ==
 // 
 // First Item Count 
@@ -67,37 +74,33 @@ const think = (char = new Character()) => {
 	return char.Brain.activate(reformatInput(char));
 };
 
-const trainCharacter = (char = new Character()) => (output = 0) => {
-	think(char);
+const trainCharacter = (char = new Character()) => (input = [0], output = [0]) => {
+	char.Brain.activate(input);
 	char.Brain.propagate(config.LearningRate, output);
 };
 
+
 const roundToTradeAction = (action = 0) => {
-	const TradeAction = {
+	const TradeActionValues = {
 		Buy: 0.33,
 		Sell: 0.66,
 		Produce: 1.0
 	};
-	const TradeActionEnum = {
-		Buy: 0,
-		Sell: 1,
-		Produce: 2
-	};
-	if (action <= TradeAction.Buy) {
-		return TradeActionEnum.Buy;
-	} else if (action <= TradeAction.Sell && action > TradeAction.Buy) {
-		return TradeActionEnum.Sell;
+	if (action <= TradeActionValues.Buy) {
+		return TradeAction.Buy;
+	} else if (action <= TradeActionValues.Sell && action > TradeActionValues.Buy) {
+		return TradeAction.Sell;
 	} else {
-		return TradeActionEnum.Produce;
+		return TradeAction.Produce;
 	}
 };
 
 const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item(), char = new Character()) => {
 	if (actionOnItem < 0.5) {
-		return char;
+		return { Character: char, Success: true };
 	}
 	let actionEnum = roundToTradeAction(actionValue);
-	const actionHandler = {
+	let actionHandler = {
 		0: trade.Buy(item),
 		1: trade.Sell(item),
 		2: produce(item)
@@ -106,8 +109,9 @@ const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item
 	let action = actionHandler[actionEnum.toString()];
 	let clone = arsfn.clone(char);
 
-	char.Inventory = action(char);
-	return clone;
+	let actionResult = action(char);
+	clone.Inventory = actionResult.Inventory;
+	return { Character: clone, Success: actionResult.Success };
 };
 
 // Buy, Sell or Produce Decision Input 0
@@ -118,16 +122,68 @@ const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item
 const act = (char = new Character()) => (brainOutput = [0]) => {
 	let updatedChar = arsfn.clone(char);
 	let itemIndex = 1;
+	let outputSuccess = [];
 	for (let item of Object.keys(items)) {
-		updatedChar = executeDecidedAction(brainOutput[0], brainOutput[itemIndex], items[item], updatedChar);
+		let actionResult = executeDecidedAction(brainOutput[0], brainOutput[itemIndex], items[item], updatedChar);
+		updatedChar = actionResult.Character;
+		outputSuccess.push(actionResult.Success);
 		itemIndex++;
 	}
-	return updatedChar;
+	return { Character: updatedChar, OutputSuccess: outputSuccess };
+};
+
+// @param lastInput : Characters last neural network (brain) input
+// Last Output : Result of neural network (brain) output
+// 
+/**
+ *  Train the character concerning on the last input, output and its success 
+ *	@param lastInput Last input of neural network (aka Brain)
+ *	@param lastOutput Last output of neural network (aka Brain) 
+ *	@param actionSuccess Success of output on items (length is 1 less than neural network output)
+ *	@param resultSuccess End result of the last act. At current implementation the successful result is increase on character wealth. 
+ */
+const learn = (char = new Character()) => (lastInput = [0], lastOutput = [0], actionSuccess = [0], resultSuccess = true) => {
+	// currently we are only learning from our failures :)
+	if (resultSuccess) {
+		return;
+	}
+
+	let expectedOutput = [...lastOutput];
+
+	// If character has no item, he needs to buy. Let's train this first.
+	if (char.Inventory.Items.length == 0 && roundToTradeAction(lastOutput[0]) != TradeAction.Buy) {
+		expectedOutput[0] = 0; // Less than 0.33 is buy
+		trainCharacter(char)(lastInput, expectedOutput);
+		return;
+	}
+
+	// If character has no money, he cannot buy. Secondary life lesson :)
+	if (char.Inventory.Balance < 5 && roundToTradeAction(lastOutput[0]) == TradeAction.Buy) {
+		expectedOutput[0] = Math.floor((Math.random() * 66) + 33) / 100; // Some random greater than 0.33
+		trainCharacter(char)(lastInput, expectedOutput);
+		return;
+	}
+
+
+	expectedOutput = [lastOutput[0]];
+	let itemOutputs = [...lastOutput];
+	itemOutputs.splice(0, 1);
+	// If you don't want to do anything with any item. Do some other action :)
+	if(_.every(itemOutputs, t => t < 0.5)) {
+		expectedOutput[0] = Math.random(); // Some random 
+	}
+	for (let i = 0; i < actionSuccess.length; i++) {
+		expectedOutput.push(actionSuccess[i] ? Math.round(itemOutputs[i]) : 0);
+	}
+
+	trainCharacter(char)(lastInput, expectedOutput);
 };
 
 module.exports = {
 	NeuralNetworkInputs: neuralNetworkInputs,
+	ReformatInput: reformatInput,
 	Think: think,
 	Act: act,
 	Train: trainCharacter,
+	Learn: learn
 };

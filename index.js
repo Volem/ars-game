@@ -31,14 +31,31 @@ StartSimulation()
 
 async function StartSimulation() {
 	let volem = await EventManager.MinerCreated('Volem');
-	let decision = ai.Think(volem);
-	console.log(`Decision : ${decision}`);
-	let currentInventory = _.countBy(volem.Inventory.Items, t=> t.Name);
-	console.log(`Current Inventory = ${JSON.stringify(currentInventory)}`);
-	let updatedVolem = ai.Act(volem)(decision);
-	let updatedInventory = _.countBy(updatedVolem.Inventory.Items, t=> t.Name);
-	console.log(`Updated Inventory = ${JSON.stringify(updatedInventory)}`);
+	for (let i = 0; i < 2000; i++) {
+		let decision = ai.Think(volem);
+		let input = ai.ReformatInput(volem);
+		console.log(`Decision : ${decision.map((t, i) => i > 0 ? t.toFixed(2): t)}`);
+		let currentInventory = _.countBy(volem.Inventory.Items, t => t.Name);
+		let currentWealth = pricing.characterWealth(volem);
+		console.log(`Current Wealth : ${currentWealth} Current Balance : ${volem.Inventory.Balance}`);
+		console.log(`Current Inventory = ${JSON.stringify(currentInventory)}`);
+		let actionResult = ai.Act(volem)(decision);
+		volem = actionResult.Character;
+		let updatedInventory = _.countBy(volem.Inventory.Items, t => t.Name);
+		let updatedWealth = pricing.characterWealth(volem);
+		console.log(`Updated Wealth : ${updatedWealth} Updated Balance : ${volem.Inventory.Balance}`);
+		console.log(`Updated Inventory = ${JSON.stringify(updatedInventory)}`);
+		let learn = ai.Learn(volem);
+		learn(input, decision, actionResult.OutputSuccess, updatedWealth > currentWealth);
+		await sleep(1000);
+	}
 }
+
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
 
 /*
 EventManager.MinerCreated('MinerVolem').then(function (minerVolem) {
