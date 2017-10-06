@@ -97,7 +97,7 @@ const roundToTradeAction = (action = 0) => {
 
 const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item(), char = new Character()) => {
 	if (actionOnItem < 0.5) {
-		return { Character: char, Success: true };
+		return { Character: char, UpdatedItemAction: actionOnItem + 0.1 };
 	}
 	let actionEnum = roundToTradeAction(actionValue);
 	let actionHandler = {
@@ -111,7 +111,7 @@ const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item
 
 	let actionResult = action(char);
 	clone.Inventory = actionResult.Inventory;
-	return { Character: clone, Success: actionResult.Success };
+	return { Character: clone, UpdatedItemAction: actionOnItem };
 };
 
 // Buy, Sell or Produce Decision Input 0
@@ -126,7 +126,7 @@ const act = (char = new Character()) => (brainOutput = [0]) => {
 	for (let item of Object.keys(items)) {
 		let actionResult = executeDecidedAction(brainOutput[0], brainOutput[itemIndex], items[item], updatedChar);
 		updatedChar = actionResult.Character;
-		outputSuccess.push(actionResult.Success);
+		outputSuccess.push(actionResult.UpdatedItemAction);
 		itemIndex++;
 	}
 	return { Character: updatedChar, OutputSuccess: outputSuccess };
@@ -164,18 +164,10 @@ const learn = (char = new Character()) => (lastInput = [0], lastOutput = [0], ac
 		return;
 	}
 
-
-	expectedOutput = [lastOutput[0]];
-	let itemOutputs = [...lastOutput];
-	itemOutputs.splice(0, 1);
-	// If you don't want to do anything with any item. Do some other action :)
-	if(_.every(itemOutputs, t => t < 0.5)) {
-		expectedOutput[0] = Math.random(); // Some random 
+	// If character wealth still not increasing when producing its wealth do some other action
+	if (roundToTradeAction(expectedOutput[0]) == TradeAction.Produce) {
+		expectedOutput[0] = Math.floor((Math.random() * 100) - 33) / 100; // Some random less than 0.67
 	}
-	for (let i = 0; i < actionSuccess.length; i++) {
-		expectedOutput.push(actionSuccess[i] ? Math.round(itemOutputs[i]) : 0);
-	}
-
 	trainCharacter(char)(lastInput, expectedOutput);
 };
 

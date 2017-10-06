@@ -25,15 +25,13 @@ const sell = (item = new Item()) => (seller = new Character()) => {
 		return { Inventory: seller.Inventory, Success: false };
 	}
 
-	let soldItems = seller.Inventory.Items.filter(t => t.Name == item.Name);
-	let price = pricing.ItemPrices[item.Name];
-	// Not enough items. Sell failed.
-	if (soldItems.length == 0) {
+	let itemExist = seller.Inventory.Items.find(t => t.Name == item.Name);
+	if (!itemExist) {
 		return { Inventory: seller.Inventory, Success: false };
 	}
 
 	let inventory = arsfn.clone(seller.Inventory);
-	inventory.Balance += price;
+	inventory.Balance += pricing.ItemPrices[item.Name];
 	inventory.Items = inventory.Items.splice(inventory.Items.findIndex(t => t.Name == item.Name), 1);
 	return { Inventory: inventory, Success: true };
 };
