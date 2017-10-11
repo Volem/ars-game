@@ -35,7 +35,7 @@ const produce = (item = new Item()) => (char = new Character()) => {
 
 	usedTools.forEach(t => t.Durability--);
 	inventory.Items.push(item);
-	_.remove(inventory.Items, t => t.Durability == 0);
+	_.remove(inventory.Items, t => t.Durability <= 0);
 	return { Inventory: inventory, Success: true };
 };
 
