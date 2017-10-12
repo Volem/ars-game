@@ -52,15 +52,15 @@ Hatchet.RequiredTools = [Anvil, Hammer, Furnace];
 Saw.Components = [Handle, ...getItemArray(3, Ore)];
 
 module.exports = {
-	Ore: Ore,
-	Stone: Stone,
-	Wood: Wood,
-	Handle: Handle,
-	Saw: Saw,
-	Hammer: Hammer,
-	Stick: Stick,
-	Anvil: Anvil,
-	Furnace: Furnace,
-	Pickaxe: Pickaxe,
-	Hatchet: Hatchet
+	Ore: Object.freeze(Ore),
+	Stone: Object.freeze(Stone),
+	Wood: Object.freeze(Wood),
+	Handle: Object.freeze(Handle),
+	Saw: Object.freeze(Saw),
+	Hammer: Object.freeze(Hammer),
+	Stick: Object.freeze(Stick),
+	Anvil: Object.freeze(Anvil),
+	Furnace: Object.freeze(Furnace),
+	Pickaxe: Object.freeze(Pickaxe),
+	Hatchet: Object.freeze(Hatchet)
 };

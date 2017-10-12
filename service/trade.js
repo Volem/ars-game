@@ -14,9 +14,11 @@ const buy = (item = new Item()) => (buyer = new Character()) => {
 		return { Inventory: buyer.Inventory, Success: false };
 	}
 
+	let boughtItem = new Item();
+	boughtItem = arsfn.clone(item);
 	let inventory = arsfn.clone(buyer.Inventory);
-	item.Durability = 100;
-	inventory.Items.push(item);
+	boughtItem.Durability = 100;
+	inventory.Items.push(boughtItem);
 	inventory.Balance -= pricing.ItemPrices[item.Name];
 	return { Inventory: inventory, Success: true };
 };
@@ -33,7 +35,7 @@ const sell = (item = new Item()) => (seller = new Character()) => {
 
 	let inventory = arsfn.clone(seller.Inventory);
 	inventory.Balance += pricing.ItemPrices[item.Name];
-	inventory.Items.splice(inventory.Items.findIndex(t => t.Name == item.Name), 1);
+	arsfn.removeBy(t => t.Name == item.Name)(1);
 	return { Inventory: inventory, Success: true };
 };
 

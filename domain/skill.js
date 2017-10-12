@@ -10,9 +10,9 @@ const Carpenter = new Skill('Carpenter');
 const Blacksmith = new Skill('Blacksmith');
 
 module.exports = {
-	Skill: Skill,
-	Miner: Miner,
-	Lumberjack: Lumberjack,
-	Carpenter: Carpenter,
-	Blacksmith: Blacksmith
+	Skill: Object.freeze(Skill),
+	Miner: Object.freeze(Miner),
+	Lumberjack: Object.freeze(Lumberjack),
+	Carpenter: Object.freeze(Carpenter),
+	Blacksmith: Object.freeze(Blacksmith)
 };

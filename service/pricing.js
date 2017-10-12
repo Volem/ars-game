@@ -34,6 +34,6 @@ const characterWealth = (char = new Character()) => {
 
 module.exports = {
 	componentPrice: componentPrice,
-	ItemPrices: ItemPrices,
+	ItemPrices: Object.freeze(ItemPrices),
 	characterWealth : characterWealth
 };

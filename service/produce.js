@@ -7,7 +7,7 @@ const produce = (item = new Item()) => (char = new Character()) => {
 	if (!char.Skill ||
 		!item.Name ||
 		item.RequiredSkill.Name != char.Skill.Name ||
-		_.difference(item.RequiredTools, char.Inventory.Items).length > 0 ||
+		_.differenceBy(item.RequiredTools, char.Inventory.Items, 'Name').length > 0 ||
 		char.Inventory.Items.length < item.Components.length) {
 		return { Inventory: char.Inventory, Success: false };
 	}
@@ -34,7 +34,7 @@ const produce = (item = new Item()) => (char = new Character()) => {
 	}
 
 	usedTools.forEach(t => t.Durability--);
-	inventory.Items.push(item);
+	inventory.Items.push(arsfn.clone(item));
 	_.remove(inventory.Items, t => t.Durability <= 0);
 	return { Inventory: inventory, Success: true };
 };
