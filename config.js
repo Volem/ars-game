@@ -17,7 +17,7 @@ module.exports = {
 	BrainInputCount: brainInputCount,
 	BrainOutputCount: brainOutputCount,
 	ItemCount: itemCount, 
-	LearningRate: 0.5,
+	LearningRate: 0.1,
 	Workmanship: 5,
 	InitialExperience: 0.1,
 	WoodPrice: 1,

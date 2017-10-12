@@ -24,6 +24,7 @@ const buy = (item = new Item()) => (buyer = new Character()) => {
 };
 
 const sell = (item = new Item()) => (seller = new Character()) => {
+	const itemRemover = arsfn.removeBy(t => t.Name == item.Name)(1);
 	if (!item.Name) {
 		return { Inventory: seller.Inventory, Success: false };
 	}
@@ -35,7 +36,7 @@ const sell = (item = new Item()) => (seller = new Character()) => {
 
 	let inventory = arsfn.clone(seller.Inventory);
 	inventory.Balance += pricing.ItemPrices[item.Name];
-	arsfn.removeBy(t => t.Name == item.Name)(1);
+	inventory.Items = itemRemover(inventory.Items);
 	return { Inventory: inventory, Success: true };
 };
 

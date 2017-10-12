@@ -74,12 +74,24 @@ const neuralFormatInputs = (arr = []) => {
 const reformatInput = arsfn.compose(neuralFormatInputs, neuralNetworkInputs);
 
 const think = (char = new Character()) => {
-	return char.Brain.activate(reformatInput(char));
+	return char.Brain.Brain.activate(reformatInput(char));
 };
 
 const trainCharacter = (char = new Character()) => (input = [0], output = [0]) => {
-	char.Brain.activate(input);
-	char.Brain.propagate(config.LearningRate, output);
+	//	char.Brain.activate(input);
+	//	char.Brain.propagate(config.LearningRate, output);
+	const trainOptions = {
+		rate: 0.05,
+		iterations: 10000,
+		error: 0.01,
+		cost: null,
+		crossValidate: null,
+	};
+
+	char.Brain.Trainer.train([{
+		input: input,
+		output: output
+	}], trainOptions);
 };
 
 
@@ -124,9 +136,19 @@ const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item
 // Action on which item Input 1...n
 const act = (char = new Character()) => (brainOutput = [0]) => {
 	let updatedChar = arsfn.clone(char);
-	let itemIndex = 1;
+	let itemIndex = 3;
+	let action = 0;
+	if(brainOutput[0] > 0.5) {
+		action = 1;
+	}
+	if(brainOutput[1] > 0.5) {
+		action = 0.5;
+	}
+	if(brainOutput[2] > 0.5) {
+		action == 0;
+	}
 	for (let item of Object.keys(items)) {
-		updatedChar = executeDecidedAction(brainOutput[0], brainOutput[itemIndex], items[item], updatedChar);
+		updatedChar = executeDecidedAction(action, brainOutput[itemIndex], items[item], updatedChar);
 		itemIndex++;
 	}
 	return updatedChar;
@@ -153,40 +175,49 @@ const reformatOutput = (char, lastOutput) => {
 		minBalance += pricing.ItemPrices[item.Name];
 	}
 
+	let selectedAction = TradeAction.Produce;
+
 	if (!haveMissingItems) {
 		expectedOutput[0] = 1; // Produce
+		expectedOutput[1] = 0; // Sell
+		expectedOutput[2] = 0; // Buy
 	} else {
 		if (char.Inventory.Balance < minBalance) {
-			expectedOutput[0] = 0.5; // Sell
+			expectedOutput[0] = 0; // Produce
+			expectedOutput[1] = 1; // Sell
+			expectedOutput[2] = 0; // Buy
+			selectedAction = TradeAction.Sell;
 		} else {
-			expectedOutput[0] = 0;
+			expectedOutput[0] = 0; // Produce
+			expectedOutput[1] = 0; // Sell
+			expectedOutput[2] = 1; // Buy
+			selectedAction = TradeAction.Buy;
 		}
 	}
 
-	let itemIndex = 1;
+	let itemIndex = 3;
 	for (let key of Object.keys(items)) {
-		if (roundToTradeAction(expectedOutput[0]) == TradeAction.Buy) {
+		if (selectedAction == TradeAction.Buy) {
 			if (char.BuyItems.find(t => t.Name == items[key].Name)) {
 				expectedOutput[itemIndex] = 1;
 			} else {
 				expectedOutput[itemIndex] = 0;
 			}
-			itemIndex++;
+		} else if (selectedAction == TradeAction.Sell) {
+			expectedOutput[itemIndex] = 1;
 		} else {
 			if (char.ProduceItems.find(t => t.Name == items[key].Name)) {
 				expectedOutput[itemIndex] = 1;
 			} else {
 				expectedOutput[itemIndex] = 0;
 			}
-			itemIndex++;
 		}
+		itemIndex++;
 	}
-
-
 	return expectedOutput;
 };
 
-const learn = (char = new Character()) => (lastInput = [0], lastOutput = [0], resultSuccess = true) => {
+const learn = (char = new Character()) => (lastInput = [0], lastOutput = [0]) => {
 	// currently we are only learning from our failures :)
 	let expectedOutput = reformatOutput(char, lastOutput);
 	trainCharacter(char)(lastInput, expectedOutput);

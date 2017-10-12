@@ -36,22 +36,33 @@ async function StartSimulation() {
 	for (let i = 0; i < 20000; i++) {
 		let decision = ai.Think(volem);
 		let input = ai.ReformatInput(volem);
-		let decisionSaver = ai.SaveDecision(input);
-//		console.log(`Decision : ${decision.map((t, i) => i > 0 ? t.toFixed(4): t)}`);
-		console.log(`Decision : ${decision}`);
-		let currentInventory = _.countBy(volem.Inventory.Items, t => t.Name);
-		let currentWealth = pricing.characterWealth(volem);
-		console.log(`Current Wealth : ${currentWealth} Current Balance : ${volem.Inventory.Balance}`);
-		console.log(`Current Inventory = ${JSON.stringify(currentInventory)}`);
+		//console.log(`Decision : ${decision}`);
+		
+		//console.log(`Current Wealth : ${pricing.characterWealth(volem)} Current Balance : ${volem.Inventory.Balance}`);
+		//getInventory(volem);
 		volem = ai.Act(volem)(decision);
-		let updatedInventory = _.countBy(volem.Inventory.Items, t => t.Name);
-		let updatedWealth = pricing.characterWealth(volem);
-		console.log(`Updated Wealth : ${updatedWealth} Updated Balance : ${volem.Inventory.Balance}`);
-		console.log(`Updated Inventory = ${JSON.stringify(updatedInventory)}`);
+		//console.log(`Updated Wealth : ${pricing.characterWealth(volem)} Updated Balance : ${volem.Inventory.Balance}`);
+		//getInventory(volem);
 		let learn = ai.Learn(volem);
-		learn(input, decision, updatedWealth > currentWealth);
-		await sleep(100);
+		learn(input, decision);
+		await sleep(1);
 	}
+	for (let i = 0; i < 2000; i++) {
+		let decision = ai.Think(volem);
+		console.log(`Decision : ${decision}`);
+		console.log(`Current Wealth : ${pricing.characterWealth(volem)} Current Balance : ${volem.Inventory.Balance}`);
+		getInventory(volem);
+		volem = ai.Act(volem)(decision);
+		console.log(`Updated Wealth : ${pricing.characterWealth(volem)} Updated Balance : ${volem.Inventory.Balance}`);
+		getInventory(volem);
+		await sleep(1000);
+	}
+}
+
+
+function getInventory(char = new Character()) {
+	let currentInventory = _.countBy(char.Inventory.Items, t => t.Name);
+	console.log(`Current Inventory = ${JSON.stringify(currentInventory)}`);
 }
 
 function sleep(ms) {
