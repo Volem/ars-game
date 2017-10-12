@@ -4,9 +4,11 @@ const config = require('./config');
 const items = require('./domain/itemcomposition');
 const pricing = require('./service/pricing');
 const EventManager = require('./service/eventManager');
+const CharManager = require('./service/characterManager');
 const LogManager = require('./service/logmanager');
 const trade = require('./service/trade');
 const Character = require('./domain/character');
+const Skills = require('./domain/skill');
 const ai = require('./service/ai');
 
 /*
@@ -30,25 +32,23 @@ StartSimulation()
 
 
 async function StartSimulation() {
-	let volem = await EventManager.MinerCreated('Volem');
+	let volem = CharManager.CreateCharacter(Skills.Miner)('Volem');
 	for (let i = 0; i < 20000; i++) {
 		let decision = ai.Think(volem);
 		let input = ai.ReformatInput(volem);
+		let decisionSaver = ai.SaveDecision(input);
 //		console.log(`Decision : ${decision.map((t, i) => i > 0 ? t.toFixed(4): t)}`);
 		console.log(`Decision : ${decision}`);
 		let currentInventory = _.countBy(volem.Inventory.Items, t => t.Name);
 		let currentWealth = pricing.characterWealth(volem);
 		console.log(`Current Wealth : ${currentWealth} Current Balance : ${volem.Inventory.Balance}`);
 		console.log(`Current Inventory = ${JSON.stringify(currentInventory)}`);
-		let actionResult = ai.Act(volem)(decision);
-		volem = actionResult.Character;
+		volem = ai.Act(volem)(decision);
 		let updatedInventory = _.countBy(volem.Inventory.Items, t => t.Name);
 		let updatedWealth = pricing.characterWealth(volem);
+		await decisionSaver(decision);
 		console.log(`Updated Wealth : ${updatedWealth} Updated Balance : ${volem.Inventory.Balance}`);
 		console.log(`Updated Inventory = ${JSON.stringify(updatedInventory)}`);
-		let learn = ai.Learn(volem);
-		learn(input, decision, actionResult.OutputSuccess, updatedWealth > currentWealth);
-		await sleep(20);
 	}
 }
 

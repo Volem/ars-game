@@ -7,6 +7,8 @@ const arsfn = require('ars-functional');
 const trade = require('./trade');
 const produce = require('./produce');
 
+const TrainSetModel = require('../models/trainset.js');
+
 const TradeAction = {
 	Buy: 0,
 	Sell: 1,
@@ -97,7 +99,7 @@ const roundToTradeAction = (action = 0) => {
 
 const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item(), char = new Character()) => {
 	if (actionOnItem < 0.5) {
-		return { Character: char, UpdatedItemAction: actionOnItem + 0.1 };
+		return char;
 	}
 	let actionEnum = roundToTradeAction(actionValue);
 	let actionHandler = {
@@ -111,7 +113,7 @@ const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item
 
 	let actionResult = action(char);
 	clone.Inventory = actionResult.Inventory;
-	return { Character: clone, UpdatedItemAction: actionOnItem };
+	return clone;
 };
 
 // Buy, Sell or Produce Decision Input 0
@@ -122,14 +124,11 @@ const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item
 const act = (char = new Character()) => (brainOutput = [0]) => {
 	let updatedChar = arsfn.clone(char);
 	let itemIndex = 1;
-	let outputSuccess = [];
 	for (let item of Object.keys(items)) {
-		let actionResult = executeDecidedAction(brainOutput[0], brainOutput[itemIndex], items[item], updatedChar);
-		updatedChar = actionResult.Character;
-		outputSuccess.push(actionResult.UpdatedItemAction);
+		updatedChar = executeDecidedAction(brainOutput[0], brainOutput[itemIndex], items[item], updatedChar);
 		itemIndex++;
 	}
-	return { Character: updatedChar, OutputSuccess: outputSuccess };
+	return updatedChar;
 };
 
 // @param lastInput : Characters last neural network (brain) input
@@ -171,11 +170,19 @@ const learn = (char = new Character()) => (lastInput = [0], lastOutput = [0], ac
 	trainCharacter(char)(lastInput, expectedOutput);
 };
 
+const saveDecision = (input = [0]) => async (decision = [0]) => {
+	let dbModel = new TrainSetModel();
+	dbModel.Input = input;
+	dbModel.Decision = decision;
+	await dbModel.save();
+};
+
 module.exports = {
 	NeuralNetworkInputs: neuralNetworkInputs,
 	ReformatInput: reformatInput,
 	Think: think,
 	Act: act,
 	Train: trainCharacter,
-	Learn: learn
+	Learn: learn,
+	SaveDecision : saveDecision
 };
