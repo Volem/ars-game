@@ -15,6 +15,7 @@ const buy = (item = new Item()) => (buyer = new Character()) => {
 	}
 
 	let inventory = arsfn.clone(buyer.Inventory);
+	item.Durability = 100;
 	inventory.Items.push(item);
 	inventory.Balance -= pricing.ItemPrices[item.Name];
 	return { Inventory: inventory, Success: true };

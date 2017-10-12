@@ -6,6 +6,7 @@ const Item = require('../domain/item');
 const arsfn = require('ars-functional');
 const trade = require('./trade');
 const produce = require('./produce');
+const pricing = require('./pricing');
 
 const TrainSetModel = require('../models/trainset.js');
 
@@ -141,40 +142,83 @@ const act = (char = new Character()) => (brainOutput = [0]) => {
  *	@param actionSuccess Success of output on items (length is 1 less than neural network output)
  *	@param resultSuccess End result of the last act. At current implementation the successful result is increase on character wealth. 
  */
-const learn = (char = new Character()) => (lastInput = [0], lastOutput = [0], actionSuccess = [0], resultSuccess = true) => {
-	// currently we are only learning from our failures :)
-	if (resultSuccess) {
-		return;
-	}
-
+const reformatOutput = (char, lastOutput) => {
 	let expectedOutput = [...lastOutput];
-
-	// If character has no item, he needs to buy. Let's train this first.
-	if (char.Inventory.Items.length == 0 && roundToTradeAction(lastOutput[0]) != TradeAction.Buy) {
-		expectedOutput[0] = 0; // Less than 0.33 is buy
-		trainCharacter(char)(lastInput, expectedOutput);
-		return;
+	let haveMissingItems = false;
+	let minBalance = 0;
+	for (let item of char.BuyItems) {
+		if (!char.Inventory.Items.find(t => t.Name == item.Name)) {
+			haveMissingItems = true;
+		}
+		minBalance += pricing.ItemPrices[item.Name];
 	}
 
-	// If character has no money, he cannot buy. Secondary life lesson :)
-	if (char.Inventory.Balance < 5 && roundToTradeAction(lastOutput[0]) == TradeAction.Buy) {
-		expectedOutput[0] = Math.floor((Math.random() * 66) + 33) / 100; // Some random greater than 0.33
-		trainCharacter(char)(lastInput, expectedOutput);
-		return;
+	if (!haveMissingItems) {
+		expectedOutput[0] = 1; // Produce
+	} else {
+		if (char.Inventory.Balance < minBalance) {
+			expectedOutput[0] = 0.5; // Sell
+		} else {
+			expectedOutput[0] = 0;
+		}
 	}
 
-	// If character wealth still not increasing when producing its wealth do some other action
-	if (roundToTradeAction(expectedOutput[0]) == TradeAction.Produce) {
-		expectedOutput[0] = Math.floor((Math.random() * 100) - 33) / 100; // Some random less than 0.67
+	let itemIndex = 1;
+	for (let key of Object.keys(items)) {
+		if (roundToTradeAction(expectedOutput[0]) == TradeAction.Buy) {
+			if (char.BuyItems.find(t => t.Name == items[key].Name)) {
+				expectedOutput[itemIndex] = 1;
+			} else {
+				expectedOutput[itemIndex] = 0;
+			}
+			itemIndex++;
+		} else {
+			if (char.ProduceItems.find(t => t.Name == items[key].Name)) {
+				expectedOutput[itemIndex] = 1;
+			} else {
+				expectedOutput[itemIndex] = 0;
+			}
+			itemIndex++;
+		}
 	}
+
+
+	return expectedOutput;
+};
+
+const learn = (char = new Character()) => (lastInput = [0], lastOutput = [0], resultSuccess = true) => {
+	// currently we are only learning from our failures :)
+	let expectedOutput = reformatOutput(char, lastOutput);
 	trainCharacter(char)(lastInput, expectedOutput);
 };
 
 const saveDecision = (input = [0]) => async (decision = [0]) => {
+	const UTCNow = () => new Date().getTime();
 	let dbModel = new TrainSetModel();
+	dbModel.Timestamp = UTCNow();
 	dbModel.Input = input;
 	dbModel.Decision = decision;
 	await dbModel.save();
+};
+
+const getTrainset = async () => {
+	let data = await TrainSetModel.find();
+	let grouped = data.reduce((pre, cur) => {
+		if (roundToTradeAction(cur.Decision[0]) == TradeAction.Buy) {
+			pre.Buy.push(cur);
+		} else if (roundToTradeAction(cur.Decision[0]) == TradeAction.Produce) {
+			pre.Produce.push(cur);
+		} else if (roundToTradeAction(cur.Decision[0]) == TradeAction.Sell) {
+			pre.Sell.push(cur);
+		}
+		return pre;
+	},
+		{
+			Produce: [],
+			Buy: [],
+			Sell: []
+		});
+	return grouped;
 };
 
 module.exports = {
@@ -184,5 +228,6 @@ module.exports = {
 	Act: act,
 	Train: trainCharacter,
 	Learn: learn,
-	SaveDecision : saveDecision
+	SaveDecision: saveDecision,
+	GetTrainset: getTrainset
 };

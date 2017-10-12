@@ -46,9 +46,11 @@ async function StartSimulation() {
 		volem = ai.Act(volem)(decision);
 		let updatedInventory = _.countBy(volem.Inventory.Items, t => t.Name);
 		let updatedWealth = pricing.characterWealth(volem);
-		await decisionSaver(decision);
 		console.log(`Updated Wealth : ${updatedWealth} Updated Balance : ${volem.Inventory.Balance}`);
 		console.log(`Updated Inventory = ${JSON.stringify(updatedInventory)}`);
+		let learn = ai.Learn(volem);
+		learn(input, decision, updatedWealth > currentWealth);
+		await sleep(100);
 	}
 }
 

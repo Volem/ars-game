@@ -7,8 +7,8 @@ const Schema = mongoose.Schema;
 
 const TrainSet = new Schema({
 	Timestamp : Schema.Types.Long,
-	Input : String,
-	Decision : String
+	Input : [Number],
+	Decision : [Number]
 });
 
 module.exports = mongoose.model('TrainSet', TrainSet);

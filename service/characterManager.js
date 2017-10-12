@@ -6,18 +6,34 @@ const Skill = s.Skill;
 const Items = require('../domain/itemcomposition');
 
 const StartItems = {
-	Miner : [Items.Pickaxe],
-	Lumberjack : [Items.Hatchet],
-	Carpenter : [Items.Saw],
-	Blacksmith : [Items.Anvil, Items.Furnace, Items.Hammer]
+	Miner: [Items.Pickaxe],
+	Lumberjack: [Items.Hatchet],
+	Carpenter: [Items.Saw],
+	Blacksmith: [Items.Anvil, Items.Furnace, Items.Hammer]
 };
 
 const createCharacter = (skill = new Skill()) => (name = '') => {
-	let character = new Character(name);
+	let character = Object.assign(new Character(name), { Skill: skill });
 	character.Inventory.Balance = config.StartBalance;
-	character.Inventory.Items.push(...StartItems[skill.Name]);
+	//character.Inventory.Items.push(...StartItems[skill.Name]);
+	character.ProduceItems = Object.keys(Items).reduce((pre, cur) => {
+		if (!pre.find(t => t.Name == cur) && character.Skill == Items[cur].RequiredSkill) {
+			pre.push(Items[cur]);
+		}
+		return pre;
+	}, []);
 
-	return Object.assign(character, { Skill: skill });
+	character.BuyItems = character.ProduceItems.reduce((pre, cur) => {
+		for (let i = 0; i < cur.RequiredTools.length; i++) {
+			let tool = cur.RequiredTools[i];
+			if (!pre.find(t => t.Name == tool.Name)) {
+				pre.push(tool);
+			}
+		}
+		return pre;
+	}, []);
+
+	return character;
 };
 
 

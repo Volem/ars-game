@@ -17,11 +17,11 @@ module.exports = {
 	BrainInputCount: brainInputCount,
 	BrainOutputCount: brainOutputCount,
 	ItemCount: itemCount, 
-	LearningRate: 0.2,
+	LearningRate: 0.5,
 	Workmanship: 5,
 	InitialExperience: 0.1,
 	WoodPrice: 1,
 	OrePrice: 3,
 	StonePrice: 2,
-	StartBalance : 1000
+	StartBalance : 35
 };
