@@ -36,16 +36,16 @@ async function StartSimulation() {
 	for (let i = 0; i < 20000; i++) {
 		let decision = ai.Think(volem);
 		let input = ai.ReformatInput(volem);
-		//console.log(`Decision : ${decision}`);
+		console.log(`Decision : ${decision}`);
 		
-		//console.log(`Current Wealth : ${pricing.characterWealth(volem)} Current Balance : ${volem.Inventory.Balance}`);
-		//getInventory(volem);
+		console.log(`Current Wealth : ${pricing.characterWealth(volem)} Current Balance : ${volem.Inventory.Balance}`);
+		getInventory(volem);
 		volem = ai.Act(volem)(decision);
-		//console.log(`Updated Wealth : ${pricing.characterWealth(volem)} Updated Balance : ${volem.Inventory.Balance}`);
-		//getInventory(volem);
+		console.log(`Updated Wealth : ${pricing.characterWealth(volem)} Updated Balance : ${volem.Inventory.Balance}`);
+		getInventory(volem);
 		let learn = ai.Learn(volem);
 		learn(input, decision);
-		await sleep(1);
+		await sleep(500);
 	}
 	for (let i = 0; i < 2000; i++) {
 		let decision = ai.Think(volem);

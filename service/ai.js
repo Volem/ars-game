@@ -95,33 +95,17 @@ const trainCharacter = (char = new Character()) => (input = [0], output = [0]) =
 };
 
 
-const roundToTradeAction = (action = 0) => {
-	const TradeActionValues = {
-		Buy: 0.33,
-		Sell: 0.66,
-		Produce: 1.0
-	};
-	if (action <= TradeActionValues.Buy) {
-		return TradeAction.Buy;
-	} else if (action <= TradeActionValues.Sell && action > TradeActionValues.Buy) {
-		return TradeAction.Sell;
-	} else {
-		return TradeAction.Produce;
-	}
-};
-
 const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item(), char = new Character()) => {
 	if (actionOnItem < 0.5) {
 		return char;
 	}
-	let actionEnum = roundToTradeAction(actionValue);
 	let actionHandler = {
 		0: trade.Buy(item),
 		1: trade.Sell(item),
 		2: produce(item)
 	};
 
-	let action = actionHandler[actionEnum.toString()];
+	let action = actionHandler[actionValue.toString()];
 	let clone = arsfn.clone(char);
 
 	let actionResult = action(char);
@@ -139,13 +123,13 @@ const act = (char = new Character()) => (brainOutput = [0]) => {
 	let itemIndex = 3;
 	let action = 0;
 	if(brainOutput[0] > 0.5) {
-		action = 1;
+		action = TradeAction.Produce;
 	}
 	if(brainOutput[1] > 0.5) {
-		action = 0.5;
+		action = TradeAction.Sell;
 	}
 	if(brainOutput[2] > 0.5) {
-		action == 0;
+		action = TradeAction.Buy;
 	}
 	for (let item of Object.keys(items)) {
 		updatedChar = executeDecidedAction(action, brainOutput[itemIndex], items[item], updatedChar);
