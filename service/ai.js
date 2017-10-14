@@ -74,7 +74,7 @@ const neuralFormatInputs = (arr = []) => {
 const reformatInput = arsfn.compose(neuralFormatInputs, neuralNetworkInputs);
 
 const think = (char = new Character()) => {
-	return char.Brain.Brain.activate(reformatInput(char));
+	return char.Brain.activate(reformatInput(char));
 };
 
 const trainCharacter = (char = new Character()) => (input = [0], output = [0]) => {
@@ -88,7 +88,7 @@ const trainCharacter = (char = new Character()) => (input = [0], output = [0]) =
 		crossValidate: null,
 	};
 
-	char.Brain.Trainer.train([{
+	char.Brain.trainer.train([{
 		input: input,
 		output: output
 	}], trainOptions);
@@ -114,21 +114,22 @@ const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item
 };
 
 // Buy, Sell or Produce Decision Input 0
-// Buy <= 0.33
-// 0.33 < Sell <= 0.66
+// brain output[0] Produce
+// brain output[1] Sell
+// brain output[2] Buy
 // Produce > 0.66
 // Action on which item Input 1...n
 const act = (char = new Character()) => (brainOutput = [0]) => {
 	let updatedChar = arsfn.clone(char);
 	let itemIndex = 3;
 	let action = 0;
-	if(brainOutput[0] > 0.5) {
+	if (brainOutput[0] > 0.5) {
 		action = TradeAction.Produce;
 	}
-	if(brainOutput[1] > 0.5) {
+	if (brainOutput[1] > 0.5) {
 		action = TradeAction.Sell;
 	}
-	if(brainOutput[2] > 0.5) {
+	if (brainOutput[2] > 0.5) {
 		action = TradeAction.Buy;
 	}
 	for (let item of Object.keys(items)) {
@@ -152,11 +153,13 @@ const reformatOutput = (char, lastOutput) => {
 	let expectedOutput = [...lastOutput];
 	let haveMissingItems = false;
 	let minBalance = 0;
-	for (let item of char.BuyItems) {
-		if (!char.Inventory.Items.find(t => t.Name == item.Name)) {
+	let inventoryCounts = _.countBy(char.Inventory.Items, 'Name');
+	for (let required of char.BuyItems) {
+		let existingCount = inventoryCounts[required.Item.Name];
+		if (existingCount === undefined || existingCount < required.Count) {
 			haveMissingItems = true;
 		}
-		minBalance += pricing.ItemPrices[item.Name];
+		minBalance += pricing.ItemPrices[required.Item.Name];
 	}
 
 	let selectedAction = TradeAction.Produce;
@@ -182,14 +185,30 @@ const reformatOutput = (char, lastOutput) => {
 	let itemIndex = 3;
 	for (let key of Object.keys(items)) {
 		if (selectedAction == TradeAction.Buy) {
-			if (char.BuyItems.find(t => t.Name == items[key].Name)) {
-				expectedOutput[itemIndex] = 1;
-			} else {
-				expectedOutput[itemIndex] = 0;
+			let required = char.BuyItems.find(t => t.Item.Name == items[key].Name);
+			if (required) {
+				let existingCount = inventoryCounts[required.Item.Name];
+				if (existingCount === undefined || existingCount < required.Count) {
+					expectedOutput[itemIndex] = 1;
+				} else {
+					expectedOutput[itemIndex] = 0;
+				}
 			}
 		} else if (selectedAction == TradeAction.Sell) {
-			expectedOutput[itemIndex] = 1;
-		} else {
+			let required = char.BuyItems.find(t => t.Item.Name == items[key].Name);
+			// Don't sell a required item
+			if (required ) {
+				// Sell more than required item
+				let existingCount = inventoryCounts[required.Item.Name];
+				if(existingCount && existingCount > required.Count){
+					expectedOutput[itemIndex] = 1;
+				} else {
+					expectedOutput[itemIndex] = 0;
+				}
+			} else {
+				expectedOutput[itemIndex] = 1;
+			}
+		} else if (selectedAction == TradeAction.Produce) {
 			if (char.ProduceItems.find(t => t.Name == items[key].Name)) {
 				expectedOutput[itemIndex] = 1;
 			} else {
