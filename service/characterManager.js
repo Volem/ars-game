@@ -1,15 +1,15 @@
 'use strict';
 const config = require('../config');
-const _ = require('lodash');
+const arsfn = require('ars-functional');
 const Character = require('../domain/character');
 const Skill = require('../domain/skill').Skill;
 const Items = require('../domain/itemcomposition');
 
 const StartItems = {
-	Miner: [Items.Pickaxe],
-	Lumberjack: [Items.Hatchet],
-	Carpenter: [Items.Saw],
-	Blacksmith: [Items.Anvil, Items.Furnace, Items.Hammer]
+	Miner: [arsfn.clone(Items.Pickaxe)],
+	Lumberjack: [arsfn.clone(Items.Hatchet)],
+	Carpenter: [arsfn.clone(Items.Saw)],
+	Blacksmith: [arsfn.clone(Items.Anvil), arsfn.clone(Items.Furnace), arsfn.clone(Items.Hammer)]
 };
 
 const createCharacter = (skill = new Skill()) => (name = '') => {
