@@ -23,5 +23,5 @@ module.exports = {
 	WoodPrice: 1,
 	OrePrice: 3,
 	StonePrice: 2,
-	StartBalance : 1000
+	StartBalance : 500
 };

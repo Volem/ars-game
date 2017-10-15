@@ -1,6 +1,5 @@
 const Character = require('../domain/character');
 const items = require('../domain/itemcomposition');
-const config = require('../config');
 const _ = require('lodash');
 const Item = require('../domain/item');
 const arsfn = require('ars-functional');
@@ -194,13 +193,16 @@ const reformatOutput = (char, lastOutput) => {
 					expectedOutput[itemIndex] = 0;
 				}
 			}
+			else {
+				expectedOutput[itemIndex] = 0;
+			}
 		} else if (selectedAction == TradeAction.Sell) {
 			let required = char.BuyItems.find(t => t.Item.Name == items[key].Name);
 			// Don't sell a required item
-			if (required ) {
+			if (required) {
 				// Sell more than required item
 				let existingCount = inventoryCounts[required.Item.Name];
-				if(existingCount && existingCount > required.Count){
+				if (existingCount && existingCount > required.Count) {
 					expectedOutput[itemIndex] = 1;
 				} else {
 					expectedOutput[itemIndex] = 0;
@@ -247,11 +249,11 @@ const getTrainset = async () => {
 		}
 		return pre;
 	},
-		{
-			Produce: [],
-			Buy: [],
-			Sell: []
-		});
+	{
+		Produce: [],
+		Buy: [],
+		Sell: []
+	});
 	return grouped;
 };
 

@@ -15,7 +15,7 @@ const StartItems = {
 const createCharacter = (skill = new Skill()) => (name = '') => {
 	let character = Object.assign(new Character(name), { Skill: skill });
 	character.Inventory.Balance = config.StartBalance;
-	//character.Inventory.Items.push(...StartItems[skill.Name]);
+	character.Inventory.Items.push(...StartItems[skill.Name]);
 	character.ProduceItems = Object.keys(Items).reduce((pre, cur) => {
 		if (!pre.find(t => t.Name == cur) && character.Skill == Items[cur].RequiredSkill) {
 			pre.push(Items[cur]);
