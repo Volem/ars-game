@@ -121,16 +121,7 @@ const executeDecidedAction = (actionValue = 0, actionOnItem = 0, item = new Item
 const act = (char = new Character()) => (brainOutput = [0]) => {
 	let updatedChar = arsfn.clone(char);
 	let itemIndex = 3;
-	let action = 0;
-	if(brainOutput[0] > 0.5) {
-		action = TradeAction.Produce;
-	}
-	if(brainOutput[1] > 0.5) {
-		action = TradeAction.Sell;
-	}
-	if(brainOutput[2] > 0.5) {
-		action = TradeAction.Buy;
-	}
+	let action = GetDecision(_.take(brainOutput, 3));
 	for (let item of Object.keys(items)) {
 		updatedChar = executeDecidedAction(action, brainOutput[itemIndex], items[item], updatedChar);
 		itemIndex++;
@@ -219,11 +210,12 @@ const saveDecision = (input = [0]) => async (decision = [0]) => {
 const getTrainset = async () => {
 	let data = await TrainSetModel.find();
 	let grouped = data.reduce((pre, cur) => {
-		if (roundToTradeAction(cur.Decision[0]) == TradeAction.Buy) {
+		let action = GetDecision(_.take(cur.Decision, 3));
+		if (action == TradeAction.Buy) {
 			pre.Buy.push(cur);
-		} else if (roundToTradeAction(cur.Decision[0]) == TradeAction.Produce) {
+		} else if (action == TradeAction.Produce) {
 			pre.Produce.push(cur);
-		} else if (roundToTradeAction(cur.Decision[0]) == TradeAction.Sell) {
+		} else if (action == TradeAction.Sell) {
 			pre.Sell.push(cur);
 		}
 		return pre;
@@ -236,6 +228,22 @@ const getTrainset = async () => {
 	return grouped;
 };
 
+function GetDecision(decisionInput = [0]) {
+	if(decisionInput.length < 3) {
+		throw new Error('Decision should be 3 field. Produce, Sell, Buy in order');
+	}
+	if (decisionInput[0] > 0.5) {
+		return TradeAction.Produce;
+	}
+	if (decisionInput[1] > 0.5) {
+		return TradeAction.Sell;
+	}
+
+	if (decisionInput[2] > 0.5) {
+		return TradeAction.Buy;
+	}
+	return -1;
+}
 module.exports = {
 	NeuralNetworkInputs: neuralNetworkInputs,
 	ReformatInput: reformatInput,
