@@ -1,21 +1,21 @@
 'use strict';
 const config = require('../config');
+const arsfn = require('ars-functional');
 const Character = require('../domain/character');
-const s = require('../domain/skill');
-const Skill = s.Skill;
+const Skill = require('../domain/skill').Skill;
 const Items = require('../domain/itemcomposition');
 
 const StartItems = {
-	Miner: [Items.Pickaxe],
-	Lumberjack: [Items.Hatchet],
-	Carpenter: [Items.Saw],
-	Blacksmith: [Items.Anvil, Items.Furnace, Items.Hammer]
+	Miner: [arsfn.clone(Items.Pickaxe)],
+	Lumberjack: [arsfn.clone(Items.Hatchet)],
+	Carpenter: [arsfn.clone(Items.Saw)],
+	Blacksmith: [arsfn.clone(Items.Anvil), arsfn.clone(Items.Furnace), arsfn.clone(Items.Hammer)]
 };
 
 const createCharacter = (skill = new Skill()) => (name = '') => {
 	let character = Object.assign(new Character(name), { Skill: skill });
 	character.Inventory.Balance = config.StartBalance;
-	//character.Inventory.Items.push(...StartItems[skill.Name]);
+	character.Inventory.Items.push(...StartItems[skill.Name]);
 	character.ProduceItems = Object.keys(Items).reduce((pre, cur) => {
 		if (!pre.find(t => t.Name == cur) && character.Skill == Items[cur].RequiredSkill) {
 			pre.push(Items[cur]);
@@ -26,8 +26,27 @@ const createCharacter = (skill = new Skill()) => (name = '') => {
 	character.BuyItems = character.ProduceItems.reduce((pre, cur) => {
 		for (let i = 0; i < cur.RequiredTools.length; i++) {
 			let tool = cur.RequiredTools[i];
-			if (!pre.find(t => t.Name == tool.Name)) {
-				pre.push(tool);
+			if (tool.RequiredSkill.Name != character.Skill.Name) {
+				if (!pre.find(t => t.Item.Name == tool.Name)) {
+					pre.push({
+						Item: tool,
+						Count: 1
+					});
+				}
+			}
+		}
+		for (let i = 0; i < cur.Components.length; i++) {
+			let component = cur.Components[i];
+			if (component.RequiredSkill.Name != character.Skill.Name) {
+				let neededItem = pre.find(t => t.Item.Name == component.Name);
+				if (!neededItem) {
+					pre.push({
+						Item: component,
+						Count: 1
+					});
+				} else {
+					neededItem.Count++;
+				}
 			}
 		}
 		return pre;

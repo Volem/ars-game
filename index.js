@@ -27,7 +27,7 @@ function StartTraining(trainingSet) {
 }
 
 async function StartSimulation() {
-	let volem = CharManager.CreateCharacter(Skills.Miner)('Volem');
+	let volem = CharManager.CreateCharacter(Skills.Carpenter)('Volem');
 	for (let i = 0; i < 20000; i++) {
 		let decision = ai.Think(volem);
 		let input = ai.ReformatInput(volem);
