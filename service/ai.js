@@ -219,10 +219,9 @@ const learn = (char = new Character()) => (lastInput = [0], lastOutput = [0]) =>
 	trainCharacter(char)(lastInput, expectedOutput);
 };
 
-const saveDecision = (input = [0]) => async (decision = [0]) => {
-	const UTCNow = () => new Date().getTime();
+const saveDecision = (char = new Character()) => async (input = [0], decision = [0]) => {
 	let dbModel = new TrainSetModel();
-	dbModel.Timestamp = UTCNow();
+	dbModel.Skill = char.Skill.Name;
 	dbModel.Input = input;
 	dbModel.Decision = decision;
 	await dbModel.save();

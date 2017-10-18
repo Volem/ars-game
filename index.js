@@ -16,41 +16,32 @@ const GetTrainset = async () => await ai.GetTrainset();
 StartSimulation()
 	.then(() => LogManager.info('Simulation completed'))
 	.catch((reason) => LogManager.error(new Error(reason)));
-GetTrainset()
+/* GetTrainset()
 	.then((result) => {
 		StartTraining(result);
-	}).catch((reason) => LogManager.error(new Error(reason)));
+	}).catch((reason) => LogManager.error(new Error(reason))); */
 
 function StartTraining(trainingSet) {
 	let volem = CharManager.CreateCharacter(Skills.Miner)('Volem');
-	volem.Brain.Trainer.train()
+	volem.Brain.Trainer.train();
 }
 
 async function StartSimulation() {
-	let volem = CharManager.CreateCharacter(Skills.Carpenter)('Volem');
+	let volem = CharManager.CreateCharacter(Skills.Miner)('Volem');
+	let decisionSaver = ai.SaveDecision(volem);
 	for (let i = 0; i < 20000; i++) {
 		let decision = ai.Think(volem);
 		let input = ai.ReformatInput(volem);
-		console.log(`Decision : ${decision}`);
+		//console.log(`Decision : ${decision}`);
 
-		console.log(`Current Wealth : ${pricing.characterWealth(volem)} Current Balance : ${volem.Inventory.Balance}`);
-		getInventory(volem);
+		//console.log(`Current Wealth : ${pricing.characterWealth(volem)} Current Balance : ${volem.Inventory.Balance}`);
+		//getInventory(volem);
 		volem = ai.Act(volem)(decision);
-		console.log(`Updated Wealth : ${pricing.characterWealth(volem)} Updated Balance : ${volem.Inventory.Balance}`);
-		getInventory(volem);
-		let learn = ai.Learn(volem);
-		learn(input, decision);
-		await ai.SaveDecision(input)(decision);
-	}
-	for (let i = 0; i < 2000; i++) {
-		let decision = ai.Think(volem);
-		console.log(`Decision : ${decision}`);
-		console.log(`Current Wealth : ${pricing.characterWealth(volem)} Current Balance : ${volem.Inventory.Balance}`);
-		getInventory(volem);
-		volem = ai.Act(volem)(decision);
-		console.log(`Updated Wealth : ${pricing.characterWealth(volem)} Updated Balance : ${volem.Inventory.Balance}`);
-		getInventory(volem);
-		await sleep(1000);
+		//console.log(`Updated Wealth : ${pricing.characterWealth(volem)} Updated Balance : ${volem.Inventory.Balance}`);
+		//getInventory(volem);
+		let learner = ai.Learn(volem);
+		learner(input, decision);
+		await decisionSaver(input, decision);
 	}
 }
 

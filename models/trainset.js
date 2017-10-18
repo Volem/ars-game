@@ -6,9 +6,11 @@ require('mongoose-long')(mongoose);
 const Schema = mongoose.Schema;
 
 const TrainSet = new Schema({
-	Timestamp : Schema.Types.Long,
+	Skill: String,
 	Input : [Number],
 	Decision : [Number]
+}, {
+	timestamps : true
 });
 
 module.exports = mongoose.model('TrainSet', TrainSet);
