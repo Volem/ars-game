@@ -1,5 +1,6 @@
 'use strict';
 const _ = require('lodash');
+const arsfn = require('ars-functional');
 const config = require('./config');
 const items = require('./domain/itemcomposition');
 const pricing = require('./service/pricing');
@@ -13,17 +14,36 @@ const ai = require('./service/ai');
 const GetTrainset = async () => await ai.GetTrainset();
 
 
-StartSimulation()
+/* StartSimulation()
 	.then(() => LogManager.info('Simulation completed'))
-	.catch((reason) => LogManager.error(new Error(reason)));
-/* GetTrainset()
+	.catch((reason) => LogManager.error(new Error(reason))); */
+GetTrainset()
 	.then((result) => {
-		StartTraining(result);
-	}).catch((reason) => LogManager.error(new Error(reason))); */
+		let volem = CharManager.CreateCharacter(Skills.Miner)('Volem');
+		volem = StartTraining(volem, result);
+		let firstDecision = ai.Think(volem);
+		return;
+	}).catch((reason) => LogManager.error(new Error(reason)));
 
-function StartTraining(trainingSet) {
-	let volem = CharManager.CreateCharacter(Skills.Miner)('Volem');
-	volem.Brain.Trainer.train();
+const takeTrainingMaterials = (skill = new Skills.Skill())  => trainingSet => {
+	let skillSpecificMaterials = trainingSet.find(t => t.Skill == skill.Name).Trainset;
+	let produce = _.take(skillSpecificMaterials.Produce, 100);
+	let sell = _.take(skillSpecificMaterials.Sell, 100);
+	let buy = _.take(skillSpecificMaterials.Buy, 100);
+
+	let allMaterials = [...produce, ...sell, ...buy];
+	return allMaterials.map((val) => ({input:val.Input, output:val.Decision}));
+};
+
+function StartTraining(char = new Character(), trainingSet) {
+	let trainedClone = arsfn.clone(char);
+	let trainingMaterials = takeTrainingMaterials(trainedClone.Skill)(trainingSet);
+	trainedClone.Brain.trainer.train(trainingMaterials, {
+		rate : config.LearningRate,
+		iterations : 100,
+		shuffle:true
+	});
+	return trainedClone;
 }
 
 async function StartSimulation() {

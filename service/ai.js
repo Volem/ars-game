@@ -227,26 +227,38 @@ const saveDecision = (char = new Character()) => async (input = [0], decision = 
 	await dbModel.save();
 };
 
+const generateTrainsetFromDocument = (doc) => ({Input : doc.Input, Decision : doc.Decision, Datetime : doc.createdAt});
+
 const getTrainset = async () => {
 	let data = await TrainSetModel.find();
 	let grouped = data.reduce((pre, cur) => {
 		let action = GetDecision(_.take(cur.Decision, 3));
+		let skillTrainset = pre.find(t => t.Skill == cur.Skill);
+		let trainSetItem = generateTrainsetFromDocument(cur);
+		if (!skillTrainset) {
+			pre.push({
+				Skill: cur.Skill,
+				Trainset: {
+					Produce: [],
+					Buy: [],
+					Sell: []
+				}
+			});
+			skillTrainset = pre[pre.length - 1];
+		}
+	
 		if (action == TradeAction.Buy) {
-			pre.Buy.push(cur);
+			skillTrainset.Trainset.Buy.push(trainSetItem);
 		} else if (action == TradeAction.Produce) {
-			pre.Produce.push(cur);
+			skillTrainset.Trainset.Produce.push(trainSetItem);
 		} else if (action == TradeAction.Sell) {
-			pre.Sell.push(cur);
+			skillTrainset.Trainset.Sell.push(trainSetItem);
 		}
 		return pre;
-	},
-		{
-			Produce: [],
-			Buy: [],
-			Sell: []
-		});
+	}, []);
 	return grouped;
 };
+
 
 function GetDecision(decisionInput = [0]) {
 	if (decisionInput.length < 3) {
