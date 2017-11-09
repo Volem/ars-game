@@ -15,7 +15,7 @@ try {
 			} else {
 				console.log('Connected to MongoDB.');
 			}
-		});
+		}).catch((err) => console.log(err));
 	} else {
 		console.log('MongoDB connection is established already. No need to reconnect.');
 	}

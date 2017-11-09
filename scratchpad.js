@@ -19,7 +19,7 @@ let vendorNeuralNetwork = new Network({
 
 vendorNeuralNetwork = new Architect.LSTM(1, 4, 4, 4, 1);
 
-Test();
+//Test();
 
 function Test() {
 	console.log(`Output Before Train [0] :\t${vendorNeuralNetwork.activate([0])}`);
@@ -39,3 +39,62 @@ function Test() {
 	console.log(`Output After Train [3] :\t${vendorNeuralNetwork.activate([3])[0].toFixed(8)} , Correct value : 0`);
 }
 
+require('./service/initMongo');
+let mongoose = require('mongoose');
+require('mongoose-long')(mongoose);
+
+let Schema = mongoose.Schema;
+
+const FactCollection = (subdocument) => new Schema({
+	MachineId: Number,
+	Hourly: [subdocument],
+	Daily: [subdocument],
+	Monthly: [subdocument]
+});
+
+const FactAvailability = new Schema({
+	MachineId: Number,
+	Timestamp: Schema.Types.Long,
+	HRDate: Date,
+	DownTime: Number,
+	PauseTime: Number,
+	RunTime: Number
+});
+
+const FactBypass = new Schema({
+	MachineId: Number,
+	Timestamp: Schema.Types.Long,
+	HRDate: Date,
+	BypassCount : Number,
+	TotalEgg : Number
+});
+
+const MachineDatesSchema = new Schema({
+	MachineId: Number,
+	Time: Schema.Types.Long,
+	ServerTime: Date
+});
+
+let models = {
+	FactAvailability: mongoose.model('FactAvailabilityCollection', FactCollection(FactAvailability), 'FactAvailabilityCollection'),
+	FactBypass: mongoose.model('FactBypassCollection', FactCollection(FactBypass), 'FactBypassCollection'),
+	MachineDate: mongoose.model('MachineDates', MachineDatesSchema, 'MachineDates')
+};
+
+async function testMongo() {
+	let object = {};
+	try {
+		object.availability = await models.FactAvailability.find({ MachineId: 700002 });
+		object.bypass = await models.FactBypass.find({ MachineId: 700002 });
+		object.machinedates = await models.MachineDate.find();
+		return object;
+	} catch (ex) {
+		throw ex;
+	}
+
+}
+
+testMongo().then((result) => {
+	console.log(result);
+	console.log(result.availability[0].Hourly[0]);
+}).catch((err) => console.log(err));
