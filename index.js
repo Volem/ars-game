@@ -14,54 +14,65 @@ const ai = require('./service/ai');
 const GetTrainset = async () => await ai.GetTrainset();
 
 
-/* StartSimulation()
+/* StartTrainingDataSimulation()
 	.then(() => LogManager.info('Simulation completed'))
-	.catch((reason) => LogManager.error(new Error(reason))); */
+	.catch((reason) => LogManager.error(new Error(reason)));  */
+
+
 GetTrainset()
 	.then((result) => {
 		let volem = CharManager.CreateCharacter(Skills.Miner)('Volem');
 		volem = StartTraining(volem, result);
-		let firstDecision = ai.Think(volem);
-		return;
-	}).catch((reason) => LogManager.error(new Error(reason)));
+		return Promise.resolve(volem);
+	}).then(async (trainedChar) => {
+		await StartTrainedSimulation(trainedChar);
+	})
+	.catch((reason) => LogManager.error(new Error(reason)));
 
-const takeTrainingMaterials = (skill = new Skills.Skill())  => trainingSet => {
+const takeTrainingMaterials = (skill = new Skills.Skill()) => trainingSet => {
 	let skillSpecificMaterials = trainingSet.find(t => t.Skill == skill.Name).Trainset;
-	let produce = _.take(skillSpecificMaterials.Produce, 100);
-	let sell = _.take(skillSpecificMaterials.Sell, 100);
-	let buy = _.take(skillSpecificMaterials.Buy, 100);
+	let produce = _.take(skillSpecificMaterials.Produce, 10);
+	let sell = _.take(skillSpecificMaterials.Sell, 10);
+	let buy = _.take(skillSpecificMaterials.Buy, 10);
 
-	let allMaterials = [...produce, ...sell, ...buy];
-	return allMaterials.map((val) => ({input:val.Input, output:val.Decision}));
+	let allMaterials = [...produce, ...sell, ...buy].sort((a,b) => a.Datetime - b.Datetime);
+	return allMaterials.map((val) => ({ input: val.Input, output: val.Decision }));
 };
 
 function StartTraining(char = new Character(), trainingSet) {
 	let trainedClone = arsfn.clone(char);
 	let trainingMaterials = takeTrainingMaterials(trainedClone.Skill)(trainingSet);
 	trainedClone.Brain.trainer.train(trainingMaterials, {
-		rate : config.LearningRate,
-		iterations : 100,
-		shuffle:true
+		rate: 0.1,
+		iterations: 1000,
+		shuffle: false
 	});
 	return trainedClone;
 }
 
-async function StartSimulation() {
-	let volem = CharManager.CreateCharacter(Skills.Miner)('Volem');
-	let decisionSaver = ai.SaveDecision(volem);
-	for (let i = 0; i < 20000; i++) {
-		let decision = ai.Think(volem);
-		let input = ai.ReformatInput(volem);
-		//console.log(`Decision : ${decision}`);
 
-		//console.log(`Current Wealth : ${pricing.characterWealth(volem)} Current Balance : ${volem.Inventory.Balance}`);
-		//getInventory(volem);
-		volem = ai.Act(volem)(decision);
-		//console.log(`Updated Wealth : ${pricing.characterWealth(volem)} Updated Balance : ${volem.Inventory.Balance}`);
-		//getInventory(volem);
-		let learner = ai.Learn(volem);
+
+async function StartTrainingDataSimulation(char = new Character()) {
+	let decisionSaver = ai.SaveDecision(char);
+	for(let i = 0; i < 20000; i++){
+		let decision = ai.Think(char);
+		let input = ai.ReformatInput(char);
+		char = ai.Act(char)(decision);
+		let learner = ai.Learn(char);
 		learner(input, decision);
 		await decisionSaver(input, decision);
+	}
+}
+
+async function StartTrainedSimulation(char = new Character()) {
+	for (let i = 0; i < 20000; i++) {
+		let decision = ai.Think(char);
+		console.log(`Decision : ${decision}`);
+		console.log(`Current Wealth : ${pricing.characterWealth(char)} Current Balance : ${char.Inventory.Balance}`);
+		getInventory(char);
+		char = ai.Act(char)(decision);
+		console.log(`Updated Wealth : ${pricing.characterWealth(char)} Updated Balance : ${char.Inventory.Balance}`);
+		getInventory(char);
 	}
 }
 

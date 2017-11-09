@@ -274,7 +274,7 @@ function GetDecision(decisionInput = [0]) {
 	if (decisionInput[2] > 0.5) {
 		return TradeAction.Buy;
 	}
-	return -1;
+	return TradeAction.Buy; // Default action
 }
 module.exports = {
 	NeuralNetworkInputs: neuralNetworkInputs,
